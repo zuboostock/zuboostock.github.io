@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zuboo Broker Portal - ATV Import Pvt Ltd</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .tab-content.active { display: block; opacity: 1; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid transparent;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        input:focus, select:focus { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col relative">
+
+    <!-- Modern Glass Navbar -->
+    <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center py-4 gap-4">
+                
+                <!-- Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-[#e50000]">
+                        <img src="YOUR_ZUBOO_LOGO_LINK_HERE.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Portal</span>
+                        <span id="navBranchName" class="text-xs text-amber-600 font-bold mt-0.5 uppercase tracking-wider">ATV Import Pvt Ltd</span>
+                    </div>
+                </div>
+
+                <!-- Navigation Tabs inside Navbar -->
+                <div class="inline-flex bg-gray-100/80 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar max-w-full ring-1 ring-gray-900/5">
+                    <button onclick="switchTab('analytics')" id="btn-analytics" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-amber-700 bg-white shadow-sm ring-1 ring-gray-200">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard & Stock
+                    </button>
+                    <button onclick="switchTab('salesForm')" id="btn-salesForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                        <i data-lucide="receipt" class="w-4 h-4 mr-2"></i> Record Sale
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-48 w-full flex-grow">
+
+        <div id="notification" class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
+            <div class="flex items-center">
+                <i id="notif-icon" data-lucide="check-circle" class="w-5 h-5 mr-3"></i>
+                <span id="notif-message" class="font-medium text-sm"></span>
+            </div>
+            <button onclick="closeNotification()" class="opacity-70 hover:opacity-100 transition-opacity">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- TAB 1: Check Stock & Personal Dashboard -->
+        <div id="analytics" class="tab-content active max-w-4xl mx-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <span class="branch-display-name text-amber-600 mr-2">Branch</span> Dashboard
+                </h2>
+                <button onclick="fetchAnalytics()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-amber-600 font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-200 flex items-center ring-1 ring-gray-900/5">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-2" id="refreshIcon"></i> Sync Data
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <!-- Stat Card: My Total Sales -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex items-center">
+                    <div class="bg-amber-100 p-4 rounded-2xl mr-5">
+                        <i data-lucide="award" class="w-8 h-8 text-amber-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">My Total Sales</p>
+                        <h4 class="text-3xl font-bold text-gray-900" id="statMySales">0</h4>
+                        <p class="text-xs text-gray-400 mt-1" id="statBrokerLabel">Submit a sale to track your progress</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branch Stock Inventory -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-amber-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Current Zuboo Units Ready for Sale</h3>
+                    </div>
+                </div>
+                <div class="overflow-x-auto flex-grow p-6">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-gray-200">
+                                <th scope="col" class="pb-3 font-semibold">Bike Model</th>
+                                <th scope="col" class="pb-3 font-semibold text-right">Units In Store</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: Record Sale Form -->
+        <div id="salesForm" class="tab-content max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="banknote" class="w-5 h-5 text-amber-600"></i></div>
+                        New Broker Sale Entry
+                    </h2>
+                </div>
+                
+                <form id="newSaleForm" class="p-8 space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Branch</label>
+                            <input type="text" id="displayBranchSale" disabled class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date & Time</label>
+                            <input type="datetime-local" id="datetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Broker Name <span class="text-red-500">*</span></label>
+                            <input type="text" id="brokerName" required placeholder="Enter your full broker name" class="w-full bg-amber-50 border border-amber-300 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors shadow-sm font-medium">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name</label>
+                            <input type="text" id="customerName" placeholder="e.g. John Doe" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">NIC Number</label>
+                            <input type="text" id="nic" placeholder="e.g. 901234567V" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
+                            <select id="model" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                                <option value="">Select Model...</option>
+                                <option value="Zuboo Model 1">Zuboo Model 1</option>
+                                <option value="Zuboo Model 2">Zuboo Model 2</option>
+                                <option value="Zuboo Model 3">Zuboo Model 3</option>
+                                <option value="Zuboo Model 4">Zuboo Model 4</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Number</label>
+                            <input type="text" id="invoiceNo" placeholder="INV-2026-001" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
+                            <input type="text" id="engineNo" placeholder="ENGXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
+                            <input type="text" id="chassisNo" placeholder="CHSXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload Section -->
+                    <div class="grid grid-cols-1 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Handover Photo (Optional)</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-amber-300 border-dashed rounded-xl cursor-pointer bg-amber-50 hover:bg-amber-100 transition-colors relative overflow-hidden" id="photoDropzone">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="photoPlaceholder">
+                                        <i data-lucide="camera" class="w-8 h-8 text-amber-500 mb-2"></i>
+                                        <p class="text-sm text-amber-700 font-medium">Tap to take a photo</p>
+                                    </div>
+                                    <img id="photoPreview" class="hidden absolute inset-0 w-full h-full object-cover" />
+                                    <input type="file" id="customerPhoto" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(event)" />
+                                </label>
+                                <button type="button" onclick="clearPhoto()" class="hidden p-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors" id="clearPhotoBtn" title="Remove Photo">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" id="submitBtn" class="bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-amber-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                            <i data-lucide="check" class="w-5 h-5 mr-2" id="submitIcon"></i>
+                            <span id="submitText">Complete Broker Sale</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Success Modal Popup with Share Feature -->
+    <div id="successModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="successModalContent">
+            
+            <!-- CAPTURE AREA -->
+            <div id="receiptCard" class="bg-white w-full">
+                <div class="bg-gradient-to-r from-amber-500 to-orange-500 p-8 text-center relative overflow-hidden">
+                    <div class="absolute -top-6 -right-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                    <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+                    
+                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg relative z-10">
+                        <i data-lucide="party-popper" class="w-10 h-10 text-amber-500"></i>
+                    </div>
+                    <h3 class="text-3xl font-extrabold text-white mb-2 relative z-10">Sale Completed!</h3>
+                    <p class="text-amber-50 font-medium text-lg relative z-10">Thank you for choosing Zuboo & ATV Import Pvt Ltd.</p>
+                </div>
+                
+                <div class="p-8 bg-gray-50">
+                    <div class="w-full h-48 mb-6 rounded-xl overflow-hidden hidden shadow-inner border border-gray-200 bg-gray-100" id="modalPhotoContainer">
+                        <img id="modalCustomerPhoto" class="w-full h-full object-cover" src="" alt="Customer Photo">
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200 hidden" id="modalBrokerRow">
+                            <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Broker Name</span>
+                            <span class="font-bold text-gray-900 text-base" id="modalBrokerName">-</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                            <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Bike Model</span>
+                            <span class="font-bold text-gray-900 text-base" id="modalBikeModel">-</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                            <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Engine Number</span>
+                            <span class="font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded font-mono text-sm border border-amber-100" id="modalEngineNo">-</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                            <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Date of Sale</span>
+                            <span class="font-semibold text-gray-800 text-sm" id="modalDate">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTIONS (Not Captured) -->
+            <div class="p-8 pt-0 bg-gray-50 flex flex-col gap-3">
+                <div class="flex gap-3">
+                    <button onclick="shareReceipt(event)" class="flex-1 bg-amber-600 hover:bg-amber-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
+                        <i data-lucide="share-2" class="w-5 h-5 mr-2"></i> Share
+                    </button>
+                    <button onclick="downloadReceipt(event)" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3.5 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
+                        <i data-lucide="download" class="w-5 h-5 mr-2"></i> Save
+                    </button>
+                </div>
+                <button onclick="closeSuccessModal()" class="mt-2 w-full text-gray-500 hover:text-gray-800 font-bold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
+                    Close Window
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // CONFIGURATION: PASTE YOUR APP URL HERE
+        // =========================================================================
+        
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoPfsfY9GNQSFvwt4ZBDS5PI9qXf7o9r4d4SszG6HuoHrUbyskI3UvXrh0aIsEPR_DqA/exec"; 
+        const CURRENT_BRANCH = "Showroom_A"; 
+        const BRANCH_DISPLAY_NAME = "Colombo Branch"; 
+        const DEFAULT_BROKER_NAME = "John Doe"; 
+
+        // =========================================================================
+        
+        let currentPhotoDataUrl = "";
+
+        lucide.createIcons();
+
+        window.onload = () => {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const localISOTime = now.toISOString().slice(0,16);
+            document.getElementById('datetime').value = localISOTime;
+
+            document.getElementById('displayBranchSale').value = BRANCH_DISPLAY_NAME;
+            
+            document.querySelectorAll('.branch-display-name').forEach(el => {
+                el.textContent = BRANCH_DISPLAY_NAME;
+            });
+
+            document.getElementById('brokerName').value = DEFAULT_BROKER_NAME;
+
+            switchTab('analytics');
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const inactiveClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50";
+            document.getElementById('btn-salesForm').className = inactiveClass;
+            document.getElementById('btn-analytics').className = inactiveClass;
+            
+            const activeClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-amber-700 bg-white shadow-sm ring-1 ring-gray-200";
+            document.getElementById('btn-' + tabId).className = activeClass;
+
+            if(tabId === 'analytics') {
+                fetchAnalytics(); 
+            }
+        }
+
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhotoDataUrl = e.target.result;
+                    document.getElementById('photoPreview').src = currentPhotoDataUrl;
+                    document.getElementById('photoPreview').classList.remove('hidden');
+                    document.getElementById('photoPlaceholder').classList.add('hidden');
+                    document.getElementById('clearPhotoBtn').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearPhoto() {
+            document.getElementById('customerPhoto').value = '';
+            currentPhotoDataUrl = "";
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoPlaceholder').classList.remove('hidden');
+            document.getElementById('clearPhotoBtn').classList.add('hidden');
+        }
+
+        function showNotification(message, type = 'success') {
+            const banner = document.getElementById('notification');
+            const msgEl = document.getElementById('notif-message');
+            const iconEl = document.getElementById('notif-icon');
+            
+            msgEl.textContent = message;
+            banner.className = "max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300";
+            
+            if(type === 'success') {
+                banner.classList.add('bg-amber-50', 'text-amber-800', 'border', 'border-amber-200');
+                iconEl.setAttribute('data-lucide', 'check-circle');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-amber-500');
+            } else {
+                banner.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+                iconEl.setAttribute('data-lucide', 'alert-circle');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-red-500');
+            }
+            
+            lucide.createIcons();
+            banner.classList.remove('hidden');
+            setTimeout(() => { banner.classList.add('hidden'); }, 6000);
+        }
+
+        function closeNotification() { document.getElementById('notification').classList.add('hidden'); }
+
+        function showSuccessModal(brokerName, model, engine, chassis, dateStr, photoDataUrl) {
+            const brokerRow = document.getElementById('modalBrokerRow');
+            if(brokerName) {
+                document.getElementById('modalBrokerName').textContent = brokerName;
+                brokerRow.classList.remove('hidden');
+                brokerRow.classList.add('flex');
+            } else {
+                brokerRow.classList.add('hidden');
+                brokerRow.classList.remove('flex');
+            }
+
+            document.getElementById('modalBikeModel').textContent = model;
+            document.getElementById('modalEngineNo').textContent = engine;
+            
+            const dateObj = new Date(dateStr);
+            const formattedDate = dateObj.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) + ' at ' + dateObj.toLocaleTimeString(undefined, { hour: '2-digit', minute:'2-digit' });
+            document.getElementById('modalDate').textContent = formattedDate;
+
+            const photoContainer = document.getElementById('modalPhotoContainer');
+            const modalPhoto = document.getElementById('modalCustomerPhoto');
+            if (photoDataUrl) {
+                modalPhoto.src = photoDataUrl;
+                photoContainer.classList.remove('hidden');
+            } else {
+                modalPhoto.src = "";
+                photoContainer.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons(); 
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // Image Generation and Sharing Logic
+        async function getReceiptCanvas() {
+            const element = document.getElementById('receiptCard');
+            await new Promise(r => setTimeout(r, 200)); 
+            return await html2canvas(element, {
+                scale: 2, 
+                useCORS: true,
+                backgroundColor: "#ffffff"
+            });
+        }
+
+        async function downloadReceipt(e) {
+            try {
+                const btn = e.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span class="loader !border-t-amber-600"></span> Saving...';
+                
+                const canvas = await getReceiptCanvas();
+                const link = document.createElement('a');
+                link.download = `Zuboo_Sale_${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                btn.innerHTML = originalHTML;
+            } catch (err) {
+                console.error(err);
+                showNotification("Failed to save image.", "error");
+            }
+        }
+
+        async function shareReceipt(e) {
+            try {
+                const btn = e.currentTarget;
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span class="loader !border-t-white"></span> Sharing...';
+
+                const canvas = await getReceiptCanvas();
+                canvas.toBlob(async (blob) => {
+                    const file = new File([blob], 'Zuboo_Sale.png', { type: 'image/png' });
+                    
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({
+                            files: [file],
+                            title: 'Zuboo Sale Completed',
+                            text: 'Thank you for choosing Zuboo & ATV Import Pvt Ltd!'
+                        });
+                    } else {
+                        showNotification("Share not supported here. Saving instead.", "success");
+                        const link = document.createElement('a');
+                        link.download = `Zuboo_Sale_${new Date().getTime()}.png`;
+                        link.href = URL.createObjectURL(blob);
+                        link.click();
+                    }
+                    btn.innerHTML = originalHTML;
+                }, 'image/png');
+            } catch (err) {
+                if(err.name !== 'AbortError') { showNotification("Failed to share.", "error"); }
+                e.currentTarget.innerHTML = '<i data-lucide="share-2" class="w-5 h-5 mr-2"></i> Share';
+                lucide.createIcons();
+            }
+        }
+
+        document.getElementById('newSaleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL at the top of the script!", "error"); return; }
+
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('submitText');
+            const btnIcon = document.getElementById('submitIcon');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loader border-t-white"></span> Processing...';
+            btnIcon.style.display = 'none';
+
+            const brokerName = document.getElementById('brokerName').value;
+            const soldModel = document.getElementById('model').value;
+            const soldEngine = document.getElementById('engineNo').value;
+            const soldChassis = document.getElementById('chassisNo').value;
+            const soldDate = document.getElementById('datetime').value;
+            
+            const capturedPhoto = currentPhotoDataUrl;
+
+            const payload = {
+                action: 'recordSale',
+                showroom: CURRENT_BRANCH,
+                datetime: soldDate,
+                customerName: document.getElementById('customerName').value,
+                nic: document.getElementById('nic').value,
+                model: soldModel,
+                invoiceNo: document.getElementById('invoiceNo').value,
+                engineNo: soldEngine,
+                chassisNo: soldChassis,
+                brokerName: brokerName
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    this.reset();
+                    document.getElementById('datetime').value = new Date().toISOString().slice(0,16);
+                    document.getElementById('brokerName').value = DEFAULT_BROKER_NAME; 
+                    clearPhoto();
+                    
+                    showSuccessModal(brokerName, soldModel, soldEngine, soldChassis, soldDate, capturedPhoto);
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                }
+            } catch (error) { 
+                showNotification("Connection error. Check console.", "error"); 
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = 'Complete Broker Sale';
+                btnIcon.style.display = 'block';
+            }
+        });
+
+        async function fetchAnalytics() {
+            if (!WEB_APP_URL) {
+                document.getElementById('branchStockTableBody').innerHTML = '<tr><td colspan="2" class="py-6 text-center text-red-500">Please paste your WEB_APP_URL at the top of the script code.</td></tr>';
+                return;
+            }
+
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('animate-spin');
+
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+
+                if(data.status === 'success') {
+                    renderMyDashboard(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch stock", error);
+            } finally {
+                refreshIcon.classList.remove('animate-spin');
+            }
+        }
+
+        function renderMyDashboard(data) {
+            let mySalesCount = 0;
+
+            if (data.sales && data.sales.length > 0 && DEFAULT_BROKER_NAME) {
+                data.sales.forEach(row => {
+                    if (row[1] === CURRENT_BRANCH && row[3] === DEFAULT_BROKER_NAME) {
+                        mySalesCount++;
+                    }
+                });
+            }
+
+            if (DEFAULT_BROKER_NAME) {
+                document.getElementById('statMySales').innerText = mySalesCount;
+                document.getElementById('statBrokerLabel').innerHTML = `Broker: <span class="font-bold text-gray-700">${DEFAULT_BROKER_NAME}</span>`;
+            }
+
+            const tbody = document.getElementById('branchStockTableBody');
+            tbody.innerHTML = '';
+
+            const myStock = (data.showroomStocks && data.showroomStocks[CURRENT_BRANCH]) ? data.showroomStocks[CURRENT_BRANCH] : {};
+            const models = Object.keys(myStock);
+
+            if (models.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No inventory data found for this branch.</td></tr>';
+                return;
+            }
+
+            models.forEach(model => {
+                const qty = myStock[model];
+                const tr = document.createElement('tr');
+                const tdModel = document.createElement('td');
+                tdModel.className = "py-3 font-medium text-gray-800";
+                tdModel.textContent = model;
+                const tdQty = document.createElement('td');
+                tdQty.className = "py-3 text-right";
+                
+                let badgeClass = "bg-amber-100 text-amber-800 ring-amber-600/20";
+                if (qty <= 0) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+                else if (qty <= 2) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+
+                tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
+                
+                tr.appendChild(tdModel);
+                tr.appendChild(tdQty);
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
