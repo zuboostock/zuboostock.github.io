@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zuboo Admin Portal - ATV Import Pvt Ltd</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
+        .tab-content.active { display: block; opacity: 1; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        
+        @keyframes slideUp { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .loader {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top: 3px solid #ffffff;
+            width: 18px;
+            height: 18px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        input:focus, select:focus { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); }
+    </style>
+</head>
+<body class="text-gray-800 antialiased min-h-screen flex flex-col relative">
+
+    <!--Navbar -->
+    <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:justify-between md:items-center py-4 gap-4">
+                
+                <!-- Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-[#e50000]">
+                        <img src="zuboo.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Admin</span>
+                        <span class="text-xs text-blue-600 font-bold mt-0.5 uppercase tracking-wider">ATV</span>
+                    </div>
+                </div>
+
+                <!--Tabs -->
+                <div class="inline-flex bg-gray-100/80 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar max-w-full ring-1 ring-gray-900/5">
+                    <button onclick="switchTab('analytics')" id="btn-analytics" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-blue-700 bg-white shadow-sm ring-1 ring-gray-200">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('salesForm')" id="btn-salesForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                        <i data-lucide="receipt" class="w-4 h-4 mr-2"></i> Record Sale
+                    </button>
+                    <button onclick="switchTab('stockForm')" id="btn-stockForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                        <i data-lucide="package-plus" class="w-4 h-4 mr-2"></i> Add Stock
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-48 w-full flex-grow">
+
+        <div id="notification" class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
+            <div class="flex items-center">
+                <i id="notif-icon" data-lucide="check-circle" class="w-5 h-5 mr-3"></i>
+                <span id="notif-message" class="font-medium text-sm"></span>
+            </div>
+            <button onclick="closeNotification()" class="opacity-70 hover:opacity-100 transition-opacity">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- TAB 1: -->
+        <div id="analytics" class="tab-content active">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    Dashboard Overview
+                </h2>
+                <button onclick="fetchAnalytics()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-blue-600 font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-200 flex items-center ring-1 ring-gray-900/5">
+                    <i data-lucide="refresh-cw" class="w-4 h-4 mr-2" id="refreshIcon"></i> Sync Data
+                </button>
+            </div>
+
+            <!-- Top Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Current Stock Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-indigo-100 p-2 rounded-lg mr-3"><i data-lucide="warehouse" class="w-5 h-5 text-indigo-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Main Warehouse Stock</h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Bike Model</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Units</th>
+                                </tr>
+                            </thead>
+                            <tbody id="stockTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Sales Summary Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-purple-100 p-2 rounded-lg mr-3"><i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Sales by Branch</h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Branch</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Broker Sales Summary Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="users" class="w-5 h-5 text-amber-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Sales by Broker</h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Broker Name</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Sold</th>
+                                </tr>
+                            </thead>
+                            <tbody id="brokerSalesTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branch Stock Selection UI -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="store" class="w-5 h-5 text-teal-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Showroom Stock</h3>
+                    </div>
+                    <select id="branchStockSelector" onchange="renderBranchStockTable()" class="w-full sm:w-auto bg-white border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-2.5 transition-colors min-w-[220px]">
+                        <option value="">Select a branch to view...</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto flex-grow p-6">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-gray-200">
+                                <th scope="col" class="pb-3 font-semibold">Bike Model</th>
+                                <th scope="col" class="pb-3 font-semibold text-right">Units Currently in Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
+                            <tr><td colspan="2" class="py-8 text-center text-gray-400">Select a branch to view its stock...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+
+        <!-- TAB 2: -->
+        <div id="salesForm" class="tab-content max-w-4xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="banknote" class="w-5 h-5 text-blue-600"></i></div>
+                        New Sale Entry
+                    </h2>
+                </div>
+                
+                <form id="newSaleForm" class="p-8 space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Showroom Branch</label>
+                            <select id="showroom" onchange="toggleBrokerField()" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                                <option value="">Select Showroom...</option>
+                                <option value="Showroom_A">Showroom A (Colombo)</option>
+                                <option value="Showroom_B">Showroom B (Kandy)</option>
+                                <option value="Showroom_C">Showroom C (Galle)</option>
+                                <option value="Showroom_D">Showroom D (Jaffna)</option>
+                                <option value="Showroom_E">Showroom E (Matara)</option>
+                                <option value="Other">Other (Contact / Broker)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date & Time</label>
+                            <input type="datetime-local" id="datetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div id="brokerNameContainer" class="hidden grid-cols-1 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Broker Name</label>
+                            <input type="text" id="brokerName" placeholder="Enter broker name" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name</label>
+                            <input type="text" id="customerName" placeholder="e.g. Alex" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">NIC Number</label>
+                            <input type="text" id="nic" placeholder="e.g. 901234567V" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
+                            <select id="model" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                                <option value="">Select Model...</option>
+                                <option value="Paris">Paris</option>
+                                <option value="KB 1">KB 1</option>
+                                <option value="Tiger">Tiger</option>
+                                <option value="EX 008">EX 008</option>
+                                <option value="Tank">Tank</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Number</label>
+                            <input type="text" id="invoiceNo" placeholder="INV-2026-001" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
+                            <input type="text" id="engineNo" placeholder="ENGXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
+                            <input type="text" id="chassisNo" placeholder="CHSXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload Section -->
+                    <div class="grid grid-cols-1 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Handover Photo (Optional)</label>
+                            <div class="flex items-center space-x-4">
+                                <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-blue-300 border-dashed rounded-xl cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors relative overflow-hidden" id="photoDropzone">
+                                    <div class="flex flex-col items-center justify-center pt-5 pb-6" id="photoPlaceholder">
+                                        <i data-lucide="camera" class="w-8 h-8 text-blue-500 mb-2"></i>
+                                        <p class="text-sm text-blue-700 font-medium">Tap to take a photo</p>
+                                    </div>
+                                    <img id="photoPreview" class="hidden absolute inset-0 w-full h-full object-cover" />
+                                    <input type="file" id="customerPhoto" accept="image/*" capture="environment" class="hidden" onchange="previewPhoto(event)" />
+                                </label>
+                                <button type="button" onclick="clearPhoto()" class="hidden p-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition-colors" id="clearPhotoBtn" title="Remove Photo">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" id="submitBtn" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-blue-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                            <i data-lucide="check" class="w-5 h-5 mr-2" id="submitIcon"></i>
+                            <span id="submitText">Complete Sale</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 3: Add/Transfer Stock Form -->
+        <div id="stockForm" class="tab-content max-w-3xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <div class="bg-green-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-green-600"></i></div>
+                        Stock Entry & Transfer
+                    </h2>
+                </div>
+                
+                <form id="newStockForm" class="p-8 space-y-8">
+                    
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Destination / Location</label>
+                            <select id="stockDestination" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                                <option value="Main_Stock">Main Stock (Warehouse)</option>
+                                <option value="Showroom_A">Showroom A (Colombo)</option>
+                                <option value="Showroom_B">Showroom B (Kandy)</option>
+                                <option value="Showroom_C">Showroom C (Galle)</option>
+                                <option value="Showroom_D">Showroom D (Jaffna)</option>
+                                <option value="Showroom_E">Showroom E (Matara)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date & Time</label>
+                            <input type="datetime-local" id="stockDatetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
+                            <select id="stockModel" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                                <option value="">Select Model...</option>
+                                <option value="Paris">Paris</option>
+                                <option value="KB 1">KB 1</option>
+                                <option value="Tiger">Tiger</option>
+                                <option value="EX 008">EX 008</option>
+                                <option value="Tank">Tank</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (Quantity)</label>
+                            <input type="number" id="stockAmount" min="1" placeholder="e.g. 10" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" id="stockSubmitBtn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                            <i data-lucide="arrow-up-circle" class="w-5 h-5 mr-2" id="stockSubmitIcon"></i>
+                            <span id="stockSubmitText">Update Stock</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Success Modal Popup -->
+    <div id="successModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="successModalContent">
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center relative overflow-hidden">
+                <div class="absolute -top-6 -right-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+                <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+                
+                <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg relative z-10">
+                    <i data-lucide="party-popper" class="w-10 h-10 text-blue-600"></i>
+                </div>
+                <h3 class="text-3xl font-extrabold text-white mb-2 relative z-10">Sale Completed!</h3>
+                <p class="text-blue-100 font-medium text-lg relative z-10">Thank you for choosing Zuboo & ATV Import Pvt Ltd.</p>
+            </div>
+            
+            <div class="p-8 bg-gray-50">
+
+                <!-- Display Captured Photo -->
+                <div class="w-full h-48 mb-6 rounded-xl overflow-hidden hidden shadow-inner border border-gray-200 bg-gray-100" id="modalPhotoContainer">
+                    <img id="modalCustomerPhoto" class="w-full h-full object-cover" src="" alt="Customer Photo">
+                </div>
+
+                <div class="space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200 hidden" id="modalBrokerRow">
+                        <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Broker Name</span>
+                        <span class="font-bold text-gray-900 text-base" id="modalBrokerName">-</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Bike Model</span>
+                        <span class="font-bold text-gray-900 text-base" id="modalBikeModel">-</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Engine Number</span>
+                        <span class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-mono text-sm border border-blue-100" id="modalEngineNo">-</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Chassis Number</span>
+                        <span class="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded font-mono text-sm border border-blue-100" id="modalChassisNo">-</span>
+                    </div>
+                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                        <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Date of Sale</span>
+                        <span class="font-semibold text-gray-800 text-sm" id="modalDate">-</span>
+                    </div>
+                </div>
+                
+                <button onclick="closeSuccessModal()" class="mt-8 w-full bg-gray-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center">
+                    <i data-lucide="check" class="w-5 h-5 mr-2"></i>
+                    Awesome, Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // IMPORTANT: PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE
+        // ==========================================
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxlIQUtGTomfHS1VqGFUzsCF6md6KLSAZrNAGE09FAMz6tcqyrkStq1QJza3y7FVgyDuw/exec"; 
+        
+        let globalShowroomStocks = {}; 
+        let currentPhotoDataUrl = "";
+        
+        lucide.createIcons();
+
+        window.onload = () => {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const localISOTime = now.toISOString().slice(0,16);
+            document.getElementById('datetime').value = localISOTime;
+            document.getElementById('stockDatetime').value = localISOTime;
+            
+            // Auto load default tab data (Dashboard is first)
+            switchTab('analytics');
+        };
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const inactiveClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50";
+            document.getElementById('btn-salesForm').className = inactiveClass;
+            document.getElementById('btn-stockForm').className = inactiveClass;
+            document.getElementById('btn-analytics').className = inactiveClass;
+            
+            const activeClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-blue-700 bg-white shadow-sm ring-1 ring-gray-200";
+            document.getElementById('btn-' + tabId).className = activeClass;
+
+            if(tabId === 'analytics') {
+                fetchAnalytics(); 
+            }
+        }
+
+        // Photo Upload Handlers
+        function previewPhoto(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentPhotoDataUrl = e.target.result;
+                    document.getElementById('photoPreview').src = currentPhotoDataUrl;
+                    document.getElementById('photoPreview').classList.remove('hidden');
+                    document.getElementById('photoPlaceholder').classList.add('hidden');
+                    document.getElementById('clearPhotoBtn').classList.remove('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function clearPhoto() {
+            document.getElementById('customerPhoto').value = '';
+            currentPhotoDataUrl = "";
+            document.getElementById('photoPreview').src = '';
+            document.getElementById('photoPreview').classList.add('hidden');
+            document.getElementById('photoPlaceholder').classList.remove('hidden');
+            document.getElementById('clearPhotoBtn').classList.add('hidden');
+        }
+
+        function showNotification(message, type = 'success') {
+            const banner = document.getElementById('notification');
+            const msgEl = document.getElementById('notif-message');
+            const iconEl = document.getElementById('notif-icon');
+            
+            msgEl.textContent = message;
+            banner.className = "max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300";
+            
+            if(type === 'success') {
+                banner.classList.add('bg-green-50', 'text-green-800', 'border', 'border-green-200');
+                iconEl.setAttribute('data-lucide', 'check-circle');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-green-500');
+            } else {
+                banner.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
+                iconEl.setAttribute('data-lucide', 'alert-circle');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-red-500');
+            }
+            
+            lucide.createIcons();
+            banner.classList.remove('hidden');
+            setTimeout(() => { banner.classList.add('hidden'); }, 6000);
+        }
+
+        function closeNotification() {
+            document.getElementById('notification').classList.add('hidden');
+        }
+
+        function toggleBrokerField() {
+            const showroom = document.getElementById('showroom').value;
+            const container = document.getElementById('brokerNameContainer');
+            const input = document.getElementById('brokerName');
+            
+            if (showroom === 'Other') {
+                container.classList.remove('hidden');
+                container.classList.add('grid');
+                input.required = true;
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('grid');
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        function showSuccessModal(brokerName, model, engine, chassis, dateStr, photoDataUrl) {
+            // Broker row toggle
+            const brokerRow = document.getElementById('modalBrokerRow');
+            if(brokerName) {
+                document.getElementById('modalBrokerName').textContent = brokerName;
+                brokerRow.classList.remove('hidden');
+                brokerRow.classList.add('flex');
+            } else {
+                brokerRow.classList.add('hidden');
+                brokerRow.classList.remove('flex');
+            }
+
+            document.getElementById('modalBikeModel').textContent = model;
+            document.getElementById('modalEngineNo').textContent = engine;
+            document.getElementById('modalChassisNo').textContent = chassis;
+            
+            const dateObj = new Date(dateStr);
+            const formattedDate = dateObj.toLocaleDateString(undefined, {
+                year: 'numeric', month: 'short', day: 'numeric'
+            }) + ' at ' + dateObj.toLocaleTimeString(undefined, {
+                hour: '2-digit', minute:'2-digit'
+            });
+            document.getElementById('modalDate').textContent = formattedDate;
+
+            // Handle Photo
+            const photoContainer = document.getElementById('modalPhotoContainer');
+            const modalPhoto = document.getElementById('modalCustomerPhoto');
+            if (photoDataUrl) {
+                modalPhoto.src = photoDataUrl;
+                photoContainer.classList.remove('hidden');
+            } else {
+                modalPhoto.src = "";
+                photoContainer.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal');
+            const content = document.getElementById('successModalContent');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        document.getElementById('newSaleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL in the script!", "error"); return; }
+
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('submitText');
+            const btnIcon = document.getElementById('submitIcon');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loader"></span> Processing...';
+            btnIcon.style.display = 'none';
+
+            const soldModel = document.getElementById('model').value;
+            const soldEngine = document.getElementById('engineNo').value;
+            const soldChassis = document.getElementById('chassisNo').value;
+            const soldDate = document.getElementById('datetime').value;
+            const selectedShowroom = document.getElementById('showroom').value;
+            const brokerNameValue = selectedShowroom === 'Other' ? document.getElementById('brokerName').value : "";
+            
+            // Capture image before reset
+            const capturedPhoto = currentPhotoDataUrl;
+
+            const payload = {
+                action: 'recordSale',
+                showroom: selectedShowroom,
+                datetime: soldDate,
+                customerName: document.getElementById('customerName').value,
+                nic: document.getElementById('nic').value,
+                model: soldModel,
+                invoiceNo: document.getElementById('invoiceNo').value,
+                engineNo: soldEngine,
+                chassisNo: soldChassis,
+                brokerName: brokerNameValue
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    this.reset();
+                    toggleBrokerField(); 
+                    document.getElementById('datetime').value = new Date().toISOString().slice(0,16);
+                    clearPhoto(); // Clear uploaded photo UI
+                    
+                    showSuccessModal(brokerNameValue, soldModel, soldEngine, soldChassis, soldDate, capturedPhoto);
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                }
+            } catch (error) { 
+                showNotification("Connection error. Check console.", "error"); 
+                console.error(error);
+            } 
+            finally {
+                btn.disabled = false;
+                btnText.innerText = 'Complete Sale';
+                btnIcon.style.display = 'block';
+            }
+        });
+
+        document.getElementById('newStockForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL in the script!", "error"); return; }
+
+            const btn = document.getElementById('stockSubmitBtn');
+            const btnText = document.getElementById('stockSubmitText');
+            const btnIcon = document.getElementById('stockSubmitIcon');
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loader"></span> Updating...';
+            btnIcon.style.display = 'none';
+
+            const payload = {
+                action: 'addStock',
+                destination: document.getElementById('stockDestination').value,
+                datetime: document.getElementById('stockDatetime').value,
+                model: document.getElementById('stockModel').value,
+                amount: document.getElementById('stockAmount').value
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    showNotification("Stock log updated successfully.");
+                    this.reset();
+                    document.getElementById('stockDatetime').value = new Date().toISOString().slice(0,16);
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                }
+            } catch (error) { showNotification("Connection error.", "error"); } 
+            finally {
+                btn.disabled = false;
+                btnText.innerText = 'Update Stock';
+                btnIcon.style.display = 'block';
+            }
+        });
+
+        async function fetchAnalytics() {
+            if (!WEB_APP_URL) {
+                document.getElementById('stockTableBody').innerHTML = '<tr><td colspan="2" class="py-6 text-center text-red-500">Please set WEB_APP_URL in the HTML file</td></tr>';
+                return;
+            }
+
+            const refreshIcon = document.getElementById('refreshIcon');
+            refreshIcon.classList.add('animate-spin');
+
+            try {
+                const response = await fetch(WEB_APP_URL);
+                const data = await response.json();
+
+                if(data.status === 'success') {
+                    renderStock(data.stock);
+                    renderSalesSummary(data.sales);
+                    renderBrokerSalesSummary(data.sales);
+                    
+                    globalShowroomStocks = data.showroomStocks || {};
+                    populateBranchSelector();
+                    renderBranchStockTable();
+                }
+            } catch (error) {
+                console.error("Failed to fetch analytics", error);
+            } finally {
+                refreshIcon.classList.remove('animate-spin');
+            }
+        }
+
+        function renderStock(stockArray) {
+            const tbody = document.getElementById('stockTableBody');
+            tbody.innerHTML = '';
+            
+            if(!stockArray || stockArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No inventory found</td></tr>';
+                return;
+            }
+
+            stockArray.forEach(row => {
+                if(row[0]) {
+                    const tr = document.createElement('tr');
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-3 font-medium text-gray-800";
+                    tdModel.textContent = row[0];
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-3 text-right";
+                    
+                    let badgeClass = "bg-green-100 text-green-700 ring-green-600/20";
+                    if (row[1] <= 2) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+                    else if (row[1] <= 5) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+
+                    tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${row[1]}</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        function renderSalesSummary(salesArray) {
+            const tbody = document.getElementById('salesTableBody');
+            tbody.innerHTML = '';
+            
+            if(!salesArray || salesArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No sales data found</td></tr>';
+                return;
+            }
+
+            const branchCounts = {};
+            salesArray.forEach(row => {
+                const branch = row[1];
+                if(branch) { branchCounts[branch] = (branchCounts[branch] || 0) + 1; }
+            });
+
+            const branches = Object.keys(branchCounts);
+            if(branches.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No sales data found</td></tr>';
+                return;
+            }
+
+            branches.forEach(branch => {
+                if(branch === 'Other') return;
+
+                const tr = document.createElement('tr');
+                const tdBranch = document.createElement('td');
+                tdBranch.className = "py-3 font-medium text-gray-800 flex items-center";
+                tdBranch.innerHTML = `<i data-lucide="map-pin" class="w-4 h-4 mr-2.5 text-gray-400"></i> ${branch.replace(/_/g, ' ')}`;
+                const tdCount = document.createElement('td');
+                tdCount.className = "py-3 text-right font-bold text-gray-700";
+                tdCount.textContent = branchCounts[branch];
+                
+                tr.appendChild(tdBranch);
+                tr.appendChild(tdCount);
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function renderBrokerSalesSummary(salesArray) {
+            const tbody = document.getElementById('brokerSalesTableBody');
+            tbody.innerHTML = '';
+            
+            if(!salesArray || salesArray.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No broker sales found</td></tr>';
+                return;
+            }
+
+            const brokerCounts = {};
+            salesArray.forEach(row => {
+                const branch = row[1];
+                const brokerName = row[3]; 
+                if((branch === 'Other' || branch === 'Showroom_A') && brokerName) { 
+                    brokerCounts[brokerName] = (brokerCounts[brokerName] || 0) + 1; 
+                }
+            });
+
+            const brokers = Object.keys(brokerCounts);
+            if(brokers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No broker sales found</td></tr>';
+                return;
+            }
+
+            brokers.forEach(broker => {
+                const tr = document.createElement('tr');
+                const tdBroker = document.createElement('td');
+                tdBroker.className = "py-3 font-medium text-gray-800 flex items-center";
+                tdBroker.innerHTML = `<i data-lucide="user" class="w-4 h-4 mr-2.5 text-gray-400"></i> ${broker}`;
+                const tdCount = document.createElement('td');
+                tdCount.className = "py-3 text-right font-bold text-gray-700";
+                tdCount.textContent = brokerCounts[broker];
+                
+                tr.appendChild(tdBroker);
+                tr.appendChild(tdCount);
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+        
+        function populateBranchSelector() {
+            const selector = document.getElementById('branchStockSelector');
+            const currentSelection = selector.value;
+            selector.innerHTML = '<option value="">Select a branch to view...</option>';
+            
+            const branches = Object.keys(globalShowroomStocks);
+            branches.forEach(branch => {
+                const option = document.createElement('option');
+                option.value = branch;
+                option.textContent = branch.replace(/_/g, ' '); 
+                selector.appendChild(option);
+            });
+            
+            if (branches.includes(currentSelection)) {
+                selector.value = currentSelection;
+            } else if (branches.length > 0) {
+                selector.value = branches[0]; 
+            }
+        }
+
+        function renderBranchStockTable() {
+            const selector = document.getElementById('branchStockSelector');
+            const tbody = document.getElementById('branchStockTableBody');
+            const selectedBranch = selector.value;
+            
+            tbody.innerHTML = '';
+            
+            if (!selectedBranch || !globalShowroomStocks[selectedBranch]) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">Select a branch to view its stock...</td></tr>';
+                return;
+            }
+
+            const branchData = globalShowroomStocks[selectedBranch];
+            const models = Object.keys(branchData);
+            
+            if (models.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No inventory data for this branch.</td></tr>';
+                return;
+            }
+
+            models.forEach(model => {
+                const qty = branchData[model];
+                const tr = document.createElement('tr');
+                const tdModel = document.createElement('td');
+                tdModel.className = "py-3 font-medium text-gray-800";
+                tdModel.textContent = model;
+                const tdQty = document.createElement('td');
+                tdQty.className = "py-3 text-right";
+                
+                let badgeClass = "bg-teal-100 text-teal-800 ring-teal-600/20";
+                if (qty <= 0) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+                else if (qty <= 2) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+
+                tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
+                
+                tr.appendChild(tdModel);
+                tr.appendChild(tdQty);
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
