@@ -356,7 +356,7 @@
                 <form id="newStockForm" class="p-8 space-y-8">
                     <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-xl flex items-start border border-blue-100">
                         <i data-lucide="info" class="w-5 h-5 mr-3 flex-shrink-0 mt-0.5"></i>
-                        <p id="stockInfoText"><b>New Vehicle:</b> Fill in details manually to add to Master Inventory.</p>
+                        <p id="stockInfoText"><b>New Vehicle:</b> Fill in details manually.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -827,11 +827,11 @@
             if (dest === 'Main_Stock') {
                 findBtn.classList.add('hidden');
                 findBtn.classList.remove('flex');
-                infoText.innerHTML = "<b>New Vehicle:</b> Fill in details manually to add to Master Inventory.";
+                infoText.innerHTML = "<b>New Vehicle:</b> Fill in details manually.";
             } else {
                 findBtn.classList.remove('hidden');
                 findBtn.classList.add('flex');
-                infoText.innerHTML = "<b>Transfer Vehicle:</b> Enter the Chassis Number and click <b>Find</b> to auto-fill details before transferring.";
+                infoText.innerHTML = "<b>Transfer Vehicle:</b> Enter the Chassis Number and click <b>Find</b>.";
             }
         }
 
