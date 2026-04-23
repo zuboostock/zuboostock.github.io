@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -70,9 +70,6 @@
                     <button onclick="switchTab('salesForm')" id="btn-salesForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
                         <i data-lucide="receipt" class="w-4 h-4 mr-2"></i> Record Sale
                     </button>
-                    <button onclick="switchTab('stockForm')" id="btn-stockForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
-                        <i data-lucide="package-plus" class="w-4 h-4 mr-2"></i> Receive Stock
-                    </button>
                 </div>
 
             </div>
@@ -80,6 +77,9 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-48 w-full flex-grow">
+
+        <!-- GLOBAL DATALIST FOR MODELS -->
+        <datalist id="zubooModelsList"></datalist>
 
         <div id="notification" class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
             <div class="flex items-center">
@@ -102,18 +102,60 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <!-- Clickable Sales Widget -->
-                <div id="salesWidgetCard" class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex items-center cursor-pointer hover:bg-teal-50/40 transition-colors group">
-                    <div class="bg-teal-100 p-4 rounded-2xl mr-5 group-hover:scale-105 transition-transform">
-                        <i data-lucide="award" class="w-8 h-8 text-teal-600"></i>
-                    </div>
-                    <div class="flex-grow w-full">
-                        <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center justify-between">
-                            Total Bikes Sold
-                            <span class="text-xs text-teal-600 font-bold underline decoration-teal-300 underline-offset-2">View </span>
-                        </p>
-                        <h4 class="text-3xl font-bold text-gray-900" id="statTotalSales">-</h4>
+            <div class="grid grid-cols-1 mb-8">
+                <!-- Clickable Sales Widget with Filter -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex flex-col justify-center transition-colors relative">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-6">
+                        
+                        <div id="salesWidgetClickable" class="flex items-center cursor-pointer group w-full md:w-auto">
+                            <div class="bg-teal-100 p-4 rounded-2xl mr-5 group-hover:scale-105 transition-transform">
+                                <i data-lucide="award" class="w-8 h-8 text-teal-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-3">
+                                    Bikes Sold
+                                    <span class="text-xs text-teal-600 font-bold underline decoration-teal-300 underline-offset-2">View Breakdown</span>
+                                </p>
+                                <h4 class="text-3xl font-bold text-gray-900" id="statTotalSales">-</h4>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Filter Section -->
+                        <div class="flex flex-wrap items-center gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200 w-full md:w-auto">
+                            <select id="branchSalesFilterType" onchange="handleBranchFilterTypeChange()" class="bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2 cursor-pointer shadow-sm">
+                                <option value="this_month" selected>Current Month</option>
+                                <option value="today">Today</option>
+                                <option value="this_year">This Year</option>
+                                <option value="all">All Time</option>
+                                <option value="specific_month">Select Month</option>
+                                <option value="custom_range">Custom Range</option>
+                            </select>
+                            
+                            <div id="branchSalesFilterSpecificMonth" class="hidden items-center gap-1">
+                                <select id="branchSalesFilterMonthOnly" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm cursor-pointer">
+                                    <option value="01">January</option>
+                                    <option value="02">February</option>
+                                    <option value="03">March</option>
+                                    <option value="04">April</option>
+                                    <option value="05">May</option>
+                                    <option value="06">June</option>
+                                    <option value="07">July</option>
+                                    <option value="08">August</option>
+                                    <option value="09">September</option>
+                                    <option value="10">October</option>
+                                    <option value="11">November</option>
+                                    <option value="12">December</option>
+                                </select>
+                                <input type="number" id="branchSalesFilterYear" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm w-20 text-center" min="2000" max="2100">
+                            </div>
+                            
+                            <div id="branchSalesFilterRange" class="hidden items-center gap-1">
+                                <input type="date" id="branchSalesFilterStart" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
+                                <span class="text-gray-500 text-sm font-medium mx-1">-</span>
+                                <input type="date" id="branchSalesFilterEnd" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -147,6 +189,10 @@
                         <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="file-search" class="w-5 h-5 text-teal-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">Generate Data Report (PDF)</h3>
                     </div>
+                    <!-- NEW BULK EXPORT BUTTON -->
+                    <button onclick="openBulkReportModal()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
+                        <i data-lucide="download" class="w-4 h-4 mr-2"></i> Bulk Export CSV
+                    </button>
                 </div>
                 <div class="p-6 flex flex-col sm:flex-row items-end gap-4">
                     <div class="flex-1 w-full">
@@ -246,7 +292,6 @@
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
                                 <input type="text" id="model" list="zubooModelsList" required onchange="updateColorOptions('model', 'saleColorList')" placeholder="Select or type model..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
-                                <datalist id="zubooModelsList"></datalist>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Specific Color</label>
@@ -260,117 +305,6 @@
                         <button type="submit" id="submitBtn" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-teal-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
                             <i data-lucide="check" class="w-5 h-5 mr-2" id="submitIcon"></i>
                             <span id="submitText">Complete Sale</span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- TAB 3: Receive Stock Form -->
-        <div id="stockForm" class="tab-content max-w-3xl mx-auto">
-            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <div class="bg-emerald-100 p-2 rounded-lg mr-3"><i data-lucide="truck" class="w-5 h-5 text-emerald-600"></i></div>
-                        Log Received Stock
-                    </h2>
-                </div>
-                
-                <form id="newStockForm" class="p-8 space-y-8">
-                    <div class="bg-teal-50 text-teal-800 text-sm p-4 rounded-xl flex items-start border border-teal-100">
-                        <i data-lucide="info" class="w-5 h-5 mr-3 flex-shrink-0 mt-0.5"></i>
-                        <p id="stockInfoText"><b>Receive Vehicle:</b> Enter the Chassis Number and click <b>Verify</b> before receiving.</p>
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Receiving Location</label>
-                            <input type="text" id="displayBranchStock" disabled class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date Received</label>
-                            <input type="date" id="stockDatetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block p-3.5 transition-colors">
-                        </div>
-                    </div>
-
-                    <!-- ADD PARTS TOGGLE -->
-                    <div class="pt-4 border-t border-gray-100">
-                        <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="isPartToggle" onchange="togglePartFields()" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
-                            <span class="text-sm font-bold text-gray-800">Receive Spare Parts / Accessories</span>
-                        </label>
-                    </div>
-
-                    <!-- VEHICLE FIELDS (HIDDEN IN PART MODE) -->
-                    <div id="vehicleFields" class="bg-gray-50 p-6 rounded-2xl border border-gray-200 space-y-6">
-                        <div class="grid grid-cols-1 gap-8">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
-                                <div class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
-                                    <input type="text" id="stockChassisNo" list="stockChassisList" placeholder="Scan or Enter Chassis..." class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
-                                    <datalist id="stockChassisList"></datalist>
-                                    <button type="button" onclick="lookupVehicle('stock')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap" id="btnLookupStock">
-                                        <i data-lucide="search" class="w-4 h-4 mr-2"></i> Verify
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
-                                <input type="text" id="stockEngineNo" readonly placeholder="Auto-filled..." class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Color</label>
-                                <input type="text" id="stockColor" readonly placeholder="Auto-filled..." class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
-                            </div>
-                        </div>
-                        
-                        <div class="grid grid-cols-1 gap-8">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
-                                <input type="text" id="stockModel" readonly placeholder="Auto-filled..." class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-bold text-sm rounded-xl block p-3.5 cursor-not-allowed">
-                            </div>
-                        </div>
-                        
-                        <!-- ADD TO BATCH BUTTON -->
-                        <div id="batchActionFields" class="pt-4 border-t border-gray-200 flex justify-end">
-                            <button type="button" id="btnAddToBatch" onclick="addVehicleToBatch()" disabled class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-md transition-all flex items-center">
-                                <i data-lucide="list-plus" class="w-4 h-4 mr-2"></i> Add to Batch Queue
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- BATCH QUEUE DISPLAY (HIDDEN IN PART MODE) -->
-                    <div id="batchListContainer" class="hidden mt-6 bg-white border-2 border-emerald-100 rounded-2xl p-5 shadow-sm">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="text-sm font-bold text-emerald-800 uppercase tracking-wider flex items-center">
-                                <i data-lucide="layers" class="w-5 h-5 mr-2"></i> Pending Vehicles (<span id="batchCount">0</span>)
-                            </h4>
-                        </div>
-                        <ul id="batchListUl" class="space-y-3 mb-6">
-                            <!-- Batched items will appear here -->
-                        </ul>
-                    </div>
-
-                    <!-- PARTS DETAILS (HIDDEN BY DEFAULT) -->
-                    <div id="partFields" class="hidden grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Item / Part Name</label>
-                            <input type="text" id="partName" list="partNameList" placeholder="e.g. Brake Pad, Mirror" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
-                            <datalist id="partNameList"></datalist>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Added</label>
-                            <input type="number" id="partQty" min="1" placeholder="e.g. 10" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-emerald-100 flex justify-end">
-                        <button type="submit" id="stockSubmitBtn" class="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-emerald-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
-                            <i data-lucide="arrow-down-circle" class="w-5 h-5 mr-2" id="stockSubmitIcon"></i>
-                            <span id="stockSubmitText">Confirm All Receipts</span>
                         </button>
                     </div>
                 </form>
@@ -435,6 +369,56 @@
                 </button>
             </div>
             
+        </div>
+    </div>
+
+    <!-- Bulk Report Download Modal -->
+    <div id="bulkReportModal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="bulkReportModalContent">
+            <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i data-lucide="download-cloud" class="w-5 h-5 mr-2 text-teal-600"></i> Download Reports (CSV)
+                </h3>
+                <button onclick="closeBulkReportModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="flex border-b border-gray-200">
+                <button onclick="switchBulkTab('sales')" id="tab-dl-sales" class="flex-1 py-3 text-sm font-bold text-teal-600 border-b-2 border-teal-600 bg-teal-50/50">Sales Report</button>
+                <button onclick="switchBulkTab('stock')" id="tab-dl-stock" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Detailed Stock</button>
+            </div>
+
+            <div class="p-6">
+                <!-- Sales Tab Content -->
+                <div id="dl-sales-content" class="space-y-4 block">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
+                            <input type="date" id="dlSalesStart" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
+                            <input type="date" id="dlSalesEnd" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
+                        </div>
+                    </div>
+                    <button onclick="generateSalesCSV()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Sales Data
+                    </button>
+                </div>
+
+                <!-- Stock Tab Content -->
+                <div id="dl-stock-content" class="space-y-4 hidden">
+                    <div class="bg-teal-50 text-teal-800 text-xs p-3 rounded-lg flex items-start border border-teal-100 mb-2">
+                        <i data-lucide="info" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5"></i>
+                        <p>Downloads a detailed CSV report containing the Chassis and Engine numbers for all available stock at your branch.</p>
+                    </div>
+                    <button onclick="generateStockCSV()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Detailed Stock
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -543,7 +527,7 @@
         </div>
     </div>
 
-    <!-- NEW: Branch Sales Breakdown Modal -->
+    <!-- Branch Sales Breakdown Modal -->
     <div id="branchSalesModal" class="hidden fixed inset-0 z-[117] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="branchSalesModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-teal-50/50 flex items-center justify-between">
@@ -581,12 +565,10 @@
         
         let globalShowroomStocks = {};
         let globalAvailableChassis = {}; 
-        let globalPartsStock = {}; // Holds spare parts logic globally
-        
-        // Batch receiving logic array
-        let stockBatchQueue = [];
+        let globalPartsStock = {}; 
+        let globalSalesData = []; 
+        let globalDetailedStock = []; 
 
-        // Zuboo Model to Colors Mapping
         const ZUBOO_MODELS_COLORS = {
              "Paris": ["white"],
             "KB 1": ["White"],
@@ -607,17 +589,16 @@
             tzNow.setMinutes(tzNow.getMinutes() - tzNow.getTimezoneOffset());
             const localISODate = tzNow.toISOString().slice(0,10);
             document.getElementById('datetime').value = localISODate;
-            document.getElementById('stockDatetime').value = localISODate;
 
             // Automatically set branch field
             document.getElementById('displayBranchSale').value = BRANCH_DISPLAY_NAME;
-            document.getElementById('displayBranchStock').value = BRANCH_DISPLAY_NAME;
             
             document.querySelectorAll('.branch-display-name').forEach(el => {
                 el.textContent = BRANCH_DISPLAY_NAME;
             });
 
-            populateModelDatalists(); // Initialize dynamic models
+            populateModelDatalists();
+            initMonthYearInputs();
             switchTab('analytics');
         };
 
@@ -627,7 +608,6 @@
             
             const inactiveClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50";
             document.getElementById('btn-salesForm').className = inactiveClass;
-            document.getElementById('btn-stockForm').className = inactiveClass;
             document.getElementById('btn-analytics').className = inactiveClass;
             
             const activeClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-teal-700 bg-white shadow-sm ring-1 ring-gray-200";
@@ -636,7 +616,6 @@
             if(tabId === 'analytics') { fetchAnalytics(); }
         }
 
-        // Dynamically builds the main Model list
         function populateModelDatalists() {
             const modelList = document.getElementById('zubooModelsList');
             if (!modelList) return;
@@ -664,33 +643,6 @@
             }
         }
 
-        function populatePartNameDatalist() {
-            const list = document.getElementById('partNameList');
-            if (!list) return;
-            list.innerHTML = '';
-            
-            let availableParts = new Set();
-            
-            const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
-            
-            if (isNested) {
-                if (globalPartsStock['Main_Stock']) {
-                    Object.keys(globalPartsStock['Main_Stock']).forEach(p => availableParts.add(p));
-                }
-                if (globalPartsStock[CURRENT_BRANCH]) {
-                    Object.keys(globalPartsStock[CURRENT_BRANCH]).forEach(p => availableParts.add(p));
-                }
-            } else {
-                Object.keys(globalPartsStock).forEach(p => availableParts.add(p));
-            }
-
-            availableParts.forEach(part => {
-                const opt = document.createElement('option');
-                opt.value = part;
-                list.appendChild(opt);
-            });
-        }
-
         function updateSaleChassisDatalist() {
             const list = document.getElementById('saleChassisList');
             list.innerHTML = '';
@@ -702,213 +654,6 @@
                 });
             }
         }
-
-        function updateStockChassisDatalist() {
-            const list = document.getElementById('stockChassisList');
-            list.innerHTML = '';
-            if (globalAvailableChassis['Main_Stock']) {
-                globalAvailableChassis['Main_Stock'].forEach(chassis => {
-                    const opt = document.createElement('option');
-                    opt.value = chassis;
-                    list.appendChild(opt);
-                });
-            }
-        }
-
-        // Toggle logic for Parts Add Form vs Vehicle Add Form
-        function togglePartFields() {
-            const isPart = document.getElementById('isPartToggle').checked;
-            const vehicleFields = document.getElementById('vehicleFields');
-            const partFields = document.getElementById('partFields');
-            const batchActionFields = document.getElementById('batchActionFields');
-            const batchListContainer = document.getElementById('batchListContainer');
-            const submitText = document.getElementById('stockSubmitText');
-            const infoText = document.getElementById('stockInfoText');
-
-            if (isPart) {
-                vehicleFields.classList.add('hidden');
-                batchActionFields.classList.add('hidden');
-                batchListContainer.classList.add('hidden');
-                
-                partFields.classList.remove('hidden');
-                partFields.classList.add('grid');
-                
-                document.getElementById('stockChassisNo').required = false;
-                document.getElementById('stockEngineNo').required = false;
-                document.getElementById('stockModel').required = false;
-                document.getElementById('stockColor').required = false;
-                
-                document.getElementById('partName').required = true;
-                document.getElementById('partQty').required = true;
-                
-                submitText.innerText = "Confirm Part Receipt";
-                infoText.innerHTML = "<b>Receive Parts:</b> Select an existing part from the list or type a new one.";
-            } else {
-                vehicleFields.classList.remove('hidden');
-                batchActionFields.classList.remove('hidden');
-                if(stockBatchQueue.length > 0) batchListContainer.classList.remove('hidden');
-                
-                partFields.classList.add('hidden');
-                partFields.classList.remove('grid');
-                
-                document.getElementById('stockChassisNo').required = true;
-                document.getElementById('stockEngineNo').required = true;
-                document.getElementById('stockModel').required = true;
-                document.getElementById('stockColor').required = true;
-                
-                document.getElementById('partName').required = false;
-                document.getElementById('partQty').required = false;
-                
-                submitText.innerText = "Confirm All Receipts";
-                infoText.innerHTML = "<b>Receive Vehicle:</b> Enter the Chassis Number and click <b>Verify</b> before receiving.";
-            }
-        }
-
-        // Whenever the user types inside the receiving chassis box, disable "Add to Batch" until re-verified
-        document.getElementById('stockChassisNo').addEventListener('input', function() {
-            document.getElementById('btnAddToBatch').disabled = true;
-            document.getElementById('stockEngineNo').value = '';
-            document.getElementById('stockModel').value = '';
-            document.getElementById('stockColor').value = '';
-        });
-
-        function toggleBrokerField() {
-            const hasBroker = document.getElementById('hasBroker').checked;
-            const container = document.getElementById('brokerNameContainer');
-            const input = document.getElementById('brokerName');
-            
-            if (hasBroker) {
-                container.classList.remove('hidden');
-                container.classList.add('grid');
-                input.required = true;
-            } else {
-                container.classList.add('hidden');
-                container.classList.remove('grid');
-                input.required = false;
-                input.value = '';
-            }
-        }
-
-        async function lookupVehicle(type) {
-            if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
-            
-            const chassisInput = type === 'sale' ? document.getElementById('chassisNo') : document.getElementById('stockChassisNo');
-            const btn = type === 'sale' ? document.getElementById('btnLookupSale') : document.getElementById('btnLookupStock');
-            const chassis = chassisInput.value.trim();
-            const expectedLocation = type === 'sale' ? CURRENT_BRANCH : 'Main_Stock';
-            
-            if(!chassis) { showNotification("Please enter a Chassis Number first.", "error"); return; }
-            
-            // Check if it's already in the batch
-            if (type === 'stock' && stockBatchQueue.some(item => item.chassis.toLowerCase() === chassis.toLowerCase())) {
-                showNotification("This chassis is already in your pending batch!", "error");
-                return;
-            }
-            
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Wait...';
-            btn.disabled = true;
-
-            try {
-                const payload = { action: 'lookupChassis', chassis: chassis };
-                
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST', body: JSON.stringify(payload),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await response.json();
-                
-                if(result.status === 'success') {
-                    if (result.data.location !== expectedLocation) {
-                         showNotification(`Vehicle is currently located in ${result.data.location}, not ${expectedLocation}.`, "error");
-                         btn.innerHTML = originalHTML;
-                         btn.disabled = false;
-                         return;
-                    }
-
-                    if(type === 'sale') {
-                        document.getElementById('engineNo').value = result.data.engine;
-                        document.getElementById('model').value = result.data.model;
-                        updateColorOptions('model', 'saleColorList');
-                        document.getElementById('color').value = result.data.color;
-                    } else {
-                        document.getElementById('stockEngineNo').value = result.data.engine;
-                        document.getElementById('stockModel').value = result.data.model;
-                        document.getElementById('stockColor').value = result.data.color;
-                        document.getElementById('btnAddToBatch').disabled = false; // Enable batch adding
-                    }
-                    showNotification("Vehicle verified successfully!", "success");
-                } else {
-                    showNotification("Error: " + result.message, "error");
-                }
-            } catch(e) {
-                showNotification("Connection error during lookup.", "error");
-            } finally {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }
-        }
-
-        // ====== BATCH RECEIVING LOGIC ======
-        function addVehicleToBatch() {
-            const chassis = document.getElementById('stockChassisNo').value.trim();
-            const engine = document.getElementById('stockEngineNo').value;
-            const model = document.getElementById('stockModel').value;
-            const color = document.getElementById('stockColor').value;
-            
-            if(!chassis || !model) return;
-
-            stockBatchQueue.push({ chassis, engine, model, color });
-            
-            // Clear inputs for next scan
-            document.getElementById('stockChassisNo').value = '';
-            document.getElementById('stockEngineNo').value = '';
-            document.getElementById('stockModel').value = '';
-            document.getElementById('stockColor').value = '';
-            document.getElementById('btnAddToBatch').disabled = true;
-            
-            renderBatchList();
-            showNotification(`Added ${chassis} to batch.`, "success");
-            
-            // Refocus input for quick scanning
-            document.getElementById('stockChassisNo').focus();
-        }
-
-        function removeVehicleFromBatch(index) {
-            stockBatchQueue.splice(index, 1);
-            renderBatchList();
-        }
-
-        function renderBatchList() {
-            const container = document.getElementById('batchListContainer');
-            const ul = document.getElementById('batchListUl');
-            const count = document.getElementById('batchCount');
-            
-            count.innerText = stockBatchQueue.length;
-            ul.innerHTML = '';
-            
-            if (stockBatchQueue.length > 0) {
-                container.classList.remove('hidden');
-                stockBatchQueue.forEach((item, index) => {
-                    const li = document.createElement('li');
-                    li.className = "flex justify-between items-center bg-gray-50 p-3 rounded-xl border border-gray-200 shadow-sm";
-                    li.innerHTML = `
-                        <div>
-                            <p class="text-sm font-bold text-gray-800 tracking-wide">${item.chassis}</p>
-                            <p class="text-xs text-gray-500 font-medium">${item.model} • ${item.color || 'No Color'}</p>
-                        </div>
-                        <button type="button" onclick="removeVehicleFromBatch(${index})" class="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    `;
-                    ul.appendChild(li);
-                });
-                lucide.createIcons();
-            } else {
-                container.classList.add('hidden');
-            }
-        }
-        // ===================================
 
         function showNotification(message, type = 'success') {
             const banner = document.getElementById('notification');
@@ -953,7 +698,6 @@
             document.getElementById('modalEngineNo').textContent = engine;
             document.getElementById('modalChassisNo').textContent = chassis;
             
-            // Format just the date without time for a cleaner look
             const [year, month, day] = dateStr.split('-');
             const formattedDate = new Date(year, month - 1, day).toLocaleDateString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric'
@@ -1066,14 +810,12 @@
         }
         
         function populateReportModal(data) {
-            // Vehicle Info
             document.getElementById('repModel').textContent = data.model || 'N/A';
             document.getElementById('repColor').textContent = data.color || 'N/A';
             document.getElementById('repChassis').textContent = data.chassis || 'N/A';
             document.getElementById('repEngine').textContent = data.engine || 'N/A';
             document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
             
-            // Customer/Sale Info
             const custSection = document.getElementById('repCustomerSection');
             if (data.isSold) {
                 custSection.classList.remove('hidden');
@@ -1089,7 +831,6 @@
                 custSection.classList.add('hidden');
             }
             
-            // Show modal
             const modal = document.getElementById('reportModal');
             const content = document.getElementById('reportModalContent');
             modal.classList.remove('hidden');
@@ -1118,7 +859,6 @@
             try {
                 const { jsPDF } = window.jspdf;
                 const element = document.getElementById('reportCard');
-                // Temporarily adjust styles for better PDF capture
                 element.style.borderRadius = "0";
                 
                 const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
@@ -1132,7 +872,7 @@
                 const chassis = document.getElementById('repChassis').textContent;
                 pdf.save(`Vehicle_Report_${chassis}.pdf`);
                 
-                element.style.borderRadius = ""; // restore
+                element.style.borderRadius = ""; 
             } catch (e) {
                 console.error(e);
                 showNotification("Failed to generate PDF.", "error");
@@ -1141,7 +881,6 @@
                 btn.disabled = false;
             }
         }
-        // ---------------------------------------
 
         function showColorModal(modelName, colorDataObj) {
             document.getElementById('colorModalModelName').textContent = modelName;
@@ -1222,15 +961,23 @@
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
-        function showBranchSalesModal(branchName, modelDataObj) {
-            document.getElementById('branchSalesModalName').textContent = branchName.replace(/_/g, ' ') + ' Sales';
+        function showBranchSalesModal(branchName, modelDataObj, filterType = 'this_month') {
+            const filterMap = {
+                'this_month': 'Current Month',
+                'today': 'Today',
+                'this_year': 'This Year',
+                'all': 'All Time'
+            };
+            const filterLabel = filterMap[filterType] || 'Current Month';
+            
+            document.getElementById('branchSalesModalName').textContent = branchName.replace(/_/g, ' ') + ` Sales (${filterLabel})`;
             const listContainer = document.getElementById('branchSalesModalList');
             listContainer.innerHTML = '';
             
             const models = Object.keys(modelDataObj || {});
             
             if(models.length === 0) {
-                listContainer.innerHTML = '<p class="text-sm text-gray-500">No sales data available.</p>';
+                listContainer.innerHTML = '<p class="text-sm text-gray-500">No sales data available for this period.</p>';
             } else {
                 models.forEach(model => {
                     const qty = modelDataObj[model];
@@ -1260,6 +1007,70 @@
             content.classList.remove('scale-100', 'opacity-100');
             content.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function toggleBrokerField() {
+            const hasBroker = document.getElementById('hasBroker').checked;
+            const container = document.getElementById('brokerNameContainer');
+            const input = document.getElementById('brokerName');
+            
+            if (hasBroker) {
+                container.classList.remove('hidden');
+                container.classList.add('grid');
+                input.required = true;
+            } else {
+                container.classList.add('hidden');
+                container.classList.remove('grid');
+                input.required = false;
+                input.value = '';
+            }
+        }
+
+        async function lookupVehicle(type) {
+            if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
+            
+            const chassisInput = document.getElementById('chassisNo');
+            const btn = document.getElementById('btnLookupSale');
+            const chassis = chassisInput.value.trim();
+            const expectedLocation = CURRENT_BRANCH;
+            
+            if(!chassis) { showNotification("Please enter a Chassis Number first.", "error"); return; }
+            
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Wait...';
+            btn.disabled = true;
+
+            try {
+                const payload = { action: 'lookupChassis', chassis: chassis };
+                
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    if (result.data.location !== expectedLocation) {
+                         showNotification(`Vehicle is currently located in ${result.data.location}, not ${expectedLocation}.`, "error");
+                         btn.innerHTML = originalHTML;
+                         btn.disabled = false;
+                         return;
+                    }
+
+                    document.getElementById('engineNo').value = result.data.engine;
+                    document.getElementById('model').value = result.data.model;
+                    updateColorOptions('model', 'saleColorList');
+                    document.getElementById('color').value = result.data.color;
+                    showNotification("Vehicle verified successfully!", "success");
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                }
+            } catch(e) {
+                showNotification("Connection error during lookup.", "error");
+            } finally {
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
         }
 
         document.getElementById('newSaleForm').addEventListener('submit', async function(e) {
@@ -1326,107 +1137,183 @@
             }
         });
 
-        // BATCH RECEIVE & PART RECEIVE SUBMIT
-        document.getElementById('newStockForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL at the top of the script!", "error"); return; }
-            
-            const isPart = document.getElementById('isPartToggle').checked;
-            const dt = document.getElementById('stockDatetime').value;
+        // --- BULK EXPORT LOGIC ---
+        function openBulkReportModal() {
+            const modal = document.getElementById('bulkReportModal');
+            const content = document.getElementById('bulkReportModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+            switchBulkTab('sales');
+        }
 
-            if (!isPart && stockBatchQueue.length === 0) {
-                showNotification("Please add at least one vehicle to the batch queue first.", "error");
+        function closeBulkReportModal() {
+            const modal = document.getElementById('bulkReportModal');
+            const content = document.getElementById('bulkReportModalContent');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function switchBulkTab(tabName) {
+            const tabSalesBtn = document.getElementById('tab-dl-sales');
+            const tabStockBtn = document.getElementById('tab-dl-stock');
+            const contentSales = document.getElementById('dl-sales-content');
+            const contentStock = document.getElementById('dl-stock-content');
+
+            if (tabName === 'sales') {
+                tabSalesBtn.className = 'flex-1 py-3 text-sm font-bold text-teal-600 border-b-2 border-teal-600 bg-teal-50/50';
+                tabStockBtn.className = 'flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors';
+                contentSales.classList.remove('hidden');
+                contentStock.classList.add('hidden');
+            } else {
+                tabStockBtn.className = 'flex-1 py-3 text-sm font-bold text-teal-600 border-b-2 border-teal-600 bg-teal-50/50';
+                tabSalesBtn.className = 'flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors';
+                contentStock.classList.remove('hidden');
+                contentSales.classList.add('hidden');
+            }
+        }
+
+        function downloadCSV(filename, csvData) {
+            const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function generateSalesCSV() {
+            const branch = CURRENT_BRANCH; // Locked to branch
+            const start = document.getElementById('dlSalesStart').value;
+            const end = document.getElementById('dlSalesEnd').value;
+
+            let headers = ['Date', 'Showroom', 'Customer Name', 'Broker Name', 'Invoice No', 'NIC', 'Model', 'Color', 'Engine No', 'Chassis No'];
+            let csvContent = headers.join(',') + '\n';
+
+            if (!globalSalesData || globalSalesData.length === 0) {
+                showNotification("No sales data available to download.", "error");
                 return;
             }
 
-            const btn = document.getElementById('stockSubmitBtn');
-            const btnText = document.getElementById('stockSubmitText');
-            const btnIcon = document.getElementById('stockSubmitIcon');
-
-            btn.disabled = true;
-            btnIcon.style.display = 'none';
-            
-            if (isPart) {
-                // Submit Part Receipt Immediately
-                btnText.innerHTML = '<span class="loader border-t-white"></span> Receiving Part...';
-                const payload = {
-                    action: 'addPartStock', 
-                    destination: CURRENT_BRANCH,
-                    datetime: dt,
-                    partName: document.getElementById('partName').value.trim(),
-                    quantity: parseInt(document.getElementById('partQty').value, 10)
-                };
-
-                try {
-                    const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                    const result = await response.json();
-                    
-                    if(result.status === 'success') {
-                        showNotification("Spare Parts received successfully.");
-                        this.reset();
-                        document.getElementById('isPartToggle').checked = false;
-                        togglePartFields();
-                        
-                        const tzNow = new Date();
-                        tzNow.setMinutes(tzNow.getMinutes() - tzNow.getTimezoneOffset());
-                        document.getElementById('stockDatetime').value = tzNow.toISOString().slice(0,10);
-                        
-                        fetchAnalytics();
-                    } else { showNotification("Error: " + result.message, "error"); }
-                } catch (error) { 
-                    showNotification("Connection error.", "error"); 
-                } finally {
-                    btn.disabled = false;
-                    btnText.innerText = 'Confirm Part Receipt';
-                    btnIcon.style.display = 'block';
-                }
-
-            } else {
-                // Submit Bulk Vehicle Batch
-                let successCount = 0;
-                let failCount = 0;
-
-                for (let i = 0; i < stockBatchQueue.length; i++) {
-                    const item = stockBatchQueue[i];
-                    btnText.innerHTML = `<span class="loader border-t-white"></span> Sending ${i+1}/${stockBatchQueue.length}...`;
-                    
-                    const payload = {
-                        action: 'receiveStockByChassis', 
-                        destination: CURRENT_BRANCH,
-                        datetime: dt,
-                        chassisNo: item.chassis,
-                        engineNo: item.engine,
-                        model: item.model,
-                        color: item.color
-                    };
-
-                    try {
-                        const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                        const result = await response.json();
-                        if(result.status === 'success') successCount++;
-                        else failCount++;
-                    } catch (error) { failCount++; }
-                }
+            let filtered = globalSalesData.filter(row => {
+                if (row[1] !== branch) return false; // Ensure only this branch
                 
-                if (failCount === 0) {
-                    showNotification(`Successfully confirmed receipt of ${successCount} vehicles!`);
-                    this.reset();
-                    const tzNow = new Date();
-                    tzNow.setMinutes(tzNow.getMinutes() - tzNow.getTimezoneOffset());
-                    document.getElementById('stockDatetime').value = tzNow.toISOString().slice(0,10);
-                } else {
-                    showNotification(`Received ${successCount}. Failed ${failCount}.`, "error");
+                const saleDate = new Date(row[0]);
+                if (!isNaN(saleDate.getTime())) {
+                    if (start) {
+                        const startDate = new Date(start);
+                        startDate.setHours(0,0,0,0);
+                        if (saleDate < startDate) return false;
+                    }
+                    if (end) {
+                        const endDate = new Date(end);
+                        endDate.setHours(23,59,59,999);
+                        if (saleDate > endDate) return false;
+                    }
                 }
-                
-                stockBatchQueue = [];
-                renderBatchList();
-                fetchAnalytics();
-                
-                btn.disabled = false;
-                btnText.innerText = 'Confirm All Receipts';
-                btnIcon.style.display = 'block';
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                showNotification("No sales match the selected criteria.", "error");
+                return;
             }
-        });
+
+            filtered.forEach(row => {
+                let csvRow = row.map(cell => {
+                    let cellStr = String(cell || '');
+                    if (cell instanceof Date || (!isNaN(Date.parse(cellStr)) && cellStr.includes('T'))) {
+                       const d = new Date(cellStr);
+                       if(!isNaN(d)) cellStr = d.toLocaleDateString();
+                    }
+                    return `"${cellStr.replace(/"/g, '""')}"`; 
+                });
+                csvContent += csvRow.join(',') + '\n';
+            });
+
+            csvContent += `\n"TOTAL SALES:","${filtered.length}"\n`;
+
+            downloadCSV(`Sales_Report_${branch}_${new Date().getTime()}.csv`, csvContent);
+            closeBulkReportModal();
+        }
+
+        function generateStockCSV() {
+            const branch = CURRENT_BRANCH; // Locked to branch
+            let csvContent = "Zuboo Detailed Stock Report\n";
+            let totalRowCount = 0;
+
+            if (!globalDetailedStock || globalDetailedStock.length === 0) {
+                showNotification("No detailed stock data available. Please check backend connection.", "error");
+                return;
+            }
+
+            const processLocation = (locName, locKey) => {
+                let locationRows = "";
+                let locCount = 0;
+
+                // 1. Process Bikes for this location
+                globalDetailedStock.forEach(bike => {
+                    if (bike[0] === locKey) {
+                        let dateStr = String(bike[5] || '');
+                        if (bike[5] instanceof Date || (!isNaN(Date.parse(dateStr)) && dateStr.includes('T'))) {
+                           const d = new Date(dateStr);
+                           if(!isNaN(d)) dateStr = d.toLocaleDateString();
+                        }
+                        locationRows += `"${bike[1]}","${bike[2]}","${bike[3]}","${bike[4]}","${dateStr}"\n`;
+                        locCount++;
+                        totalRowCount++;
+                    }
+                });
+
+                // 2. Process Parts for this location
+                const isNestedParts = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
+                let partsMap = isNestedParts ? (globalPartsStock[locKey] || {}) : (locKey === 'Main_Stock' ? globalPartsStock : {});
+                
+                Object.keys(partsMap).forEach(part => {
+                    const qty = parseInt(partsMap[part]);
+                    if (qty > 0) {
+                        locationRows += `"[PART] ${part}","N/A","N/A","N/A","Qty: ${qty}"\n`;
+                        locCount++;
+                        totalRowCount++;
+                    }
+                });
+
+                if (locCount > 0) {
+                    csvContent += `\n"--- ${locName.toUpperCase()} ---"\n`;
+                    csvContent += '"Item/Model","Color","Chassis No","Engine No","Date Added/Received"\n';
+                    csvContent += locationRows;
+                }
+            };
+
+            processLocation(BRANCH_DISPLAY_NAME, CURRENT_BRANCH);
+
+            if (totalRowCount === 0) {
+                showNotification("No stock found for this location.", "error");
+                return;
+            }
+
+            csvContent += `\n"TOTAL INVENTORY:","${totalRowCount}"\n`;
+
+            downloadCSV(`Detailed_Stock_Report_${branch}_${new Date().getTime()}.csv`, csvContent);
+            closeBulkReportModal();
+        }
+
+        function initMonthYearInputs() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
+
+            const yearEl = document.getElementById('branchSalesFilterYear');
+            const monthEl = document.getElementById('branchSalesFilterMonthOnly');
+            if (yearEl) yearEl.value = currentYear;
+            if (monthEl) monthEl.value = currentMonthStr;
+        }
 
         async function fetchAnalytics() {
             if (!WEB_APP_URL) { return; }
@@ -1442,7 +1329,7 @@
                 if(data.status === 'success') {
                     globalShowroomStocks = data.showroomStocks || {};
                     globalAvailableChassis = data.availableChassis || {};
-                    globalPartsStock = data.partsStock || {}; // Get parts stock
+                    globalPartsStock = data.partsStock || {}; 
                     globalMainStockColors = data.mainStockColors || {}; 
                     
                     Object.keys(globalMainStockColors).forEach(model => {
@@ -1455,42 +1342,119 @@
                     });
                     
                     populateModelDatalists(); 
-                    populatePartNameDatalist();
 
+                    globalSalesData = data.sales || []; 
+                    globalDetailedStock = data.detailedStock || []; 
+                    
                     renderMyDashboard(data);
                     updateSaleChassisDatalist();
-                    updateStockChassisDatalist();
                 }
             } catch (error) {
                 console.error("Failed to fetch analytics", error);
             } finally { refreshIcon.classList.remove('animate-spin'); }
         }
 
-        function renderMyDashboard(data) {
-            let mySalesCount = 0;
-            let mySalesModels = {}; // Track which models were sold
+        function handleBranchFilterTypeChange() {
+            const typeVal = document.getElementById('branchSalesFilterType').value;
+            const specificMonthEl = document.getElementById('branchSalesFilterSpecificMonth');
+            const rangeEl = document.getElementById('branchSalesFilterRange');
             
-            if (data.sales && data.sales.length > 0) {
-                data.sales.forEach(row => {
+            if (typeVal === 'specific_month') {
+                specificMonthEl.classList.remove('hidden');
+                specificMonthEl.classList.add('flex');
+                rangeEl.classList.add('hidden');
+                rangeEl.classList.remove('flex');
+            } else if (typeVal === 'custom_range') {
+                specificMonthEl.classList.add('hidden');
+                specificMonthEl.classList.remove('flex');
+                rangeEl.classList.remove('hidden');
+                rangeEl.classList.add('flex');
+            } else {
+                specificMonthEl.classList.add('hidden');
+                specificMonthEl.classList.remove('flex');
+                rangeEl.classList.add('hidden');
+                rangeEl.classList.remove('flex');
+            }
+            applyBranchSalesFilter();
+        }
+
+        function applyBranchSalesFilter() {
+            let mySalesCount = 0;
+            let mySalesModels = {}; 
+            
+            const filterType = document.getElementById('branchSalesFilterType').value;
+            const now = new Date();
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
+            const currentDay = now.getDate();
+
+            if (globalSalesData && globalSalesData.length > 0) {
+                globalSalesData.forEach(row => {
                     if (row[1] === CURRENT_BRANCH) {
-                        mySalesCount++;
-                        const model = row[6] || 'Unknown Model';
-                        mySalesModels[model] = (mySalesModels[model] || 0) + 1;
+                        const saleDate = new Date(row[0]);
+                        if (isNaN(saleDate.getTime())) return;
+
+                        let include = false;
+
+                        if (filterType === 'all') {
+                            include = true;
+                        } else if (filterType === 'this_month') {
+                            include = (saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear);
+                        } else if (filterType === 'today') {
+                            include = (saleDate.getDate() === currentDay && saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear);
+                        } else if (filterType === 'this_year') {
+                            include = (saleDate.getFullYear() === currentYear);
+                        } else if (filterType === 'specific_month') {
+                            const monthVal = document.getElementById('branchSalesFilterMonthOnly').value; 
+                            const yearVal = document.getElementById('branchSalesFilterYear').value;
+                            if(!monthVal || !yearVal) {
+                                include = true;
+                            } else {
+                                include = (saleDate.getFullYear() === parseInt(yearVal) && saleDate.getMonth() === (parseInt(monthVal) - 1));
+                            }
+                        } else if (filterType === 'custom_range') {
+                            const startVal = document.getElementById('branchSalesFilterStart').value;
+                            const endVal = document.getElementById('branchSalesFilterEnd').value;
+                            
+                            include = true;
+                            if (startVal) {
+                                const startDate = new Date(startVal);
+                                startDate.setHours(0,0,0,0);
+                                if (saleDate < startDate) include = false;
+                            }
+                            if (endVal) {
+                                const endDate = new Date(endVal);
+                                endDate.setHours(23,59,59,999);
+                                if (saleDate > endDate) include = false;
+                            }
+                        }
+
+                        if (include) {
+                            mySalesCount++;
+                            const model = row[6] || 'Unknown Model';
+                            mySalesModels[model] = (mySalesModels[model] || 0) + 1;
+                        }
                     }
                 });
             }
+
             document.getElementById('statTotalSales').innerText = mySalesCount;
             
-            // Attach the click event for the sales widget modal
-            const salesWidget = document.getElementById('salesWidgetCard');
+            const salesWidget = document.getElementById('salesWidgetClickable');
             if (salesWidget) {
-                salesWidget.onclick = () => showBranchSalesModal(BRANCH_DISPLAY_NAME, mySalesModels);
+                salesWidget.onclick = (e) => {
+                    if(e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'option') return;
+                    showBranchSalesModal(BRANCH_DISPLAY_NAME, mySalesModels, filterType);
+                };
             }
+        }
+
+        function renderMyDashboard(data) {
+            applyBranchSalesFilter();
 
             const tbody = document.getElementById('branchStockTableBody');
             tbody.innerHTML = '';
 
-            // Calculate Parts for this Showroom
             const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
             let branchPartsMap = isNested ? (globalPartsStock[CURRENT_BRANCH] || {}) : {};
             let branchPartsCount = 0;
@@ -1540,7 +1504,6 @@
                 tbody.appendChild(tr);
             });
             
-            // Render Parts Row
             if (branchPartsCount > 0) {
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
