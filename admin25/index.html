@@ -53,8 +53,8 @@
                         <img src="YOUR_ZUBOO_LOGO_LINK_HERE.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
                     </div>
                     <div class="flex flex-col">
-                        <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Admin</span>
-                        <span class="text-xs text-blue-600 font-bold mt-0.5 uppercase tracking-wider"></span>
+                        <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Admin Portal</span>
+                        <span class="text-xs text-blue-600 font-bold mt-0.5 uppercase tracking-wider">ATV Import Pvt Ltd</span>
                     </div>
                 </div>
 
@@ -67,7 +67,10 @@
                         <i data-lucide="receipt" class="w-4 h-4 mr-2"></i> Record Sale
                     </button>
                     <button onclick="switchTab('stockForm')" id="btn-stockForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
-                        <i data-lucide="package-plus" class="w-4 h-4 mr-2"></i> Add/Transfer Stock
+                        <i data-lucide="package-plus" class="w-4 h-4 mr-2"></i> Add Stock
+                    </button>
+                    <button onclick="switchTab('transferForm')" id="btn-transferForm" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                        <i data-lucide="arrow-left-right" class="w-4 h-4 mr-2"></i> Transfer Stock
                     </button>
                 </div>
 
@@ -76,6 +79,10 @@
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-48 w-full flex-grow">
+
+        <!-- GLOBAL DATALIST FOR MODELS -->
+        <datalist id="zubooModelsList"></datalist>
+        <datalist id="partNameList"></datalist>
 
         <div id="notification" class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
             <div class="flex items-center">
@@ -96,14 +103,16 @@
                 </button>
             </div>
 
-            <!-- Changed grid-cols-4 to grid-cols-2 for wider horizontal fields -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                 
                 <!-- Total Inventory Table -->
                 <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
                         <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="layers" class="w-5 h-5 text-blue-600"></i></div>
-                        <h3 class="text-lg font-bold text-gray-800">Total Inventory</h3>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Total Inventory
+                            <span id="totalInventoryCount" class="ml-3 bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
                         <table class="min-w-full text-left text-sm whitespace-nowrap">
@@ -124,7 +133,10 @@
                 <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
                         <div class="bg-indigo-100 p-2 rounded-lg mr-3"><i data-lucide="warehouse" class="w-5 h-5 text-indigo-600"></i></div>
-                        <h3 class="text-lg font-bold text-gray-800">Main Warehouse</h3>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Main Warehouse
+                            <span id="mainWarehouseCount" class="ml-3 bg-indigo-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
                         <table class="min-w-full text-left text-sm whitespace-nowrap">
@@ -146,7 +158,10 @@
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
                         <div class="flex items-center">
                             <div class="bg-purple-100 p-2 rounded-lg mr-3"><i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i></div>
-                            <h3 class="text-lg font-bold text-gray-800">Sales by Branch</h3>
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                Sales by Branch
+                                <span id="salesBranchCount" class="ml-3 bg-purple-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            </h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <select id="salesFilterTypeBranch" onchange="handleFilterTypeChange('Branch')" class="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg focus:ring-purple-500 focus:border-purple-500 block p-1.5 cursor-pointer shadow-sm">
@@ -199,7 +214,10 @@
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
                         <div class="flex items-center">
                             <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="users" class="w-5 h-5 text-amber-600"></i></div>
-                            <h3 class="text-lg font-bold text-gray-800">Sales by Broker</h3>
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                Sales by Broker
+                                <span id="salesBrokerCount" class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            </h3>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <select id="salesFilterTypeBroker" onchange="handleFilterTypeChange('Broker')" class="bg-white border border-gray-300 text-gray-700 text-xs rounded-lg focus:ring-amber-500 focus:border-amber-500 block p-1.5 cursor-pointer shadow-sm">
@@ -253,7 +271,10 @@
                 <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center">
                         <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="store" class="w-5 h-5 text-teal-600"></i></div>
-                        <h3 class="text-lg font-bold text-gray-800">Showroom Inventory</h3>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Showroom Inventory
+                            <span id="showroomInventoryCount" class="ml-3 bg-teal-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
                     </div>
                     <select id="branchStockSelector" onchange="renderBranchStockTable()" class="w-full sm:w-auto bg-white border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-2.5 transition-colors min-w-[220px]">
                         <option value="">Select a branch to view...</option>
@@ -281,7 +302,7 @@
                         <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="file-search" class="w-5 h-5 text-blue-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">Generate Data Report (PDF)</h3>
                     </div>
-                    <!-- NEW BULK EXPORT BUTTON -->
+                    <!-- BULK EXPORT BUTTON -->
                     <button onclick="openBulkReportModal()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
                         <i data-lucide="download" class="w-4 h-4 mr-2"></i> Bulk Export CSV
                     </button>
@@ -423,26 +444,159 @@
             </div>
         </div>
 
-        <!-- TAB 3: Add/Transfer Stock Form (ADMIN CREATES STOCK) -->
+        <!-- TAB 3: Add Stock Form (ADMIN CREATES NEW IMPORT) -->
         <div id="stockForm" class="tab-content max-w-3xl mx-auto">
             <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                 <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <div class="bg-green-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-green-600"></i></div>
-                        Stock Entry & Transfer
+                        <div class="bg-green-100 p-2 rounded-lg mr-3"><i data-lucide="package-plus" class="w-5 h-5 text-green-600"></i></div>
+                        Add New Stock (Import)
                     </h2>
                 </div>
                 
-                <form id="newStockForm" class="p-8 space-y-8">
+                <form id="addStockForm" class="p-8 space-y-6">
                     <div class="bg-blue-50 text-blue-800 text-sm p-4 rounded-xl flex items-start border border-blue-100">
                         <i data-lucide="info" class="w-5 h-5 mr-3 flex-shrink-0 mt-0.5"></i>
-                        <p id="stockInfoText"><b>New Vehicle:</b> Fill in details manually to add to Master Inventory.</p>
+                        <p><b>New Import:</b> Fill in details manually or use Quick Paste to add brand new items to inventory.</p>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Destination / Location</label>
-                            <select id="stockDestination" onchange="toggleStockMode()" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Destination (To)</label>
+                            <select id="addDestination" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                                <option value="Main_Stock" selected>Main Stock (Warehouse)</option>
+                                <option value="ANGUNAKOLA Branch">ANGUNAKOLA Branch</option>
+                                <option value="AMBALANTOTA Branch">AMBALANTOTA Branch</option>
+                                <option value="AR EMBELIPITIYA Branch">AR EMBELIPITIYA Branch</option>
+                                <option value="AR RATHNAPURA Branch">AR RATHNAPURA Branch</option>
+                                <option value="AR SURIYAWAWA Branch">AR SURIYAWAWA Branch</option>
+                                <option value="AR THISSA Branch">AR THISSA Branch</option>
+                                <option value="AR WADDUWA Branch">AR WADDUWA Branch</option>
+                                <option value="GANEMULLA Branch">GANEMULLA Branch</option>
+                                <option value="LUNUGAMVEHERA Branch">LUNUGAMVEHERA Branch</option>
+                                <option value="MONARAGALA Branch">MONARAGALA Branch</option>
+                                <option value="PADALANGALA Branch">PADALANGALA Branch</option>
+                                <option value="PUTHTHALAMA Branch">PUTHTHALAMA Branch</option>
+                                <option value="THALPITIYA Branch">THALPITIYA Branch</option>
+                                <option value="US ANURADAPURA Branch">US ANURADAPURA Branch</option>
+                                <option value="US WATHTHALA Branch">US WATHTHALA Branch</option>
+                                <option value="WADIGALA Branch">WADIGALA Branch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Date Added</label>
+                            <input type="date" id="addDatetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100">
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="isAddPartToggle" onchange="toggleAddPartFields()" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
+                            <span class="text-sm font-bold text-gray-800">Add Spare Parts / Accessories</span>
+                        </label>
+                    </div>
+
+                    <!-- Vehicle details -->
+                    <div id="addVehicleFields" class="space-y-8 pt-4 border-t border-gray-100">
+                        <!-- Quick Auto-Fill -->
+                        <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 mb-2">
+                            <label class="block text-sm font-semibold text-indigo-800 mb-2">Quick Paste (Format)</label>
+                            <div class="flex items-stretch bg-white border border-indigo-200 rounded-xl overflow-hidden shadow-sm">
+                                <input type="text" id="addQuickPasteStr" placeholder="e.g. GT BLACK/ORANGE LU5.../ZB25..." class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
+                                <button type="button" onclick="parseQuickStringAdd()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap">
+                                    <i data-lucide="wand-2" class="w-4 h-4 mr-2"></i> Auto-Fill
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
+                                <input type="text" id="addChassisNo" placeholder="Enter Chassis..." required class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
+                                <input type="text" id="addEngineNo" placeholder="ENGXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
+                                <input type="text" id="addModel" list="zubooModelsList" required onchange="updateColorOptions('addModel', 'addColorList')" placeholder="Select or type model..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                                <datalist id="addColorList"></datalist>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Specific Color</label>
+                                <input type="text" id="addColor" list="addColorList" required placeholder="Select or type color..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parts details (Hidden by default) -->
+                    <div id="addPartFields" class="hidden grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Item / Part Name</label>
+                            <input type="text" id="addPartName" list="partNameList" placeholder="e.g. Brake Pad, Mirror" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Added</label>
+                            <input type="number" id="addPartQty" min="1" placeholder="e.g. 10" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="pt-6 flex justify-end">
+                        <button type="submit" id="addSubmitBtn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                            <i data-lucide="package-plus" class="w-5 h-5 mr-2" id="addSubmitIcon"></i>
+                            <span id="addSubmitText">Add Stock</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 4: Transfer Stock Form -->
+        <div id="transferForm" class="tab-content max-w-3xl mx-auto">
+            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100 bg-orange-50/50 flex items-center justify-between">
+                    <h2 class="text-xl font-bold text-gray-800 flex items-center">
+                        <div class="bg-orange-100 p-2 rounded-lg mr-3"><i data-lucide="arrow-left-right" class="w-5 h-5 text-orange-600"></i></div>
+                        Transfer Existing Stock
+                    </h2>
+                </div>
+                
+                <form id="transferStockForm" class="p-8 space-y-6">
+                    <div class="bg-orange-50 text-orange-800 text-sm p-4 rounded-xl flex items-start border border-orange-100">
+                        <i data-lucide="info" class="w-5 h-5 mr-3 flex-shrink-0 mt-0.5"></i>
+                        <p id="transferInfoText"><b>Transfer Vehicle:</b> Moving from <b>Main Warehouse</b> to <b>Main Warehouse</b>.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Current Location (From)</label>
+                            <select id="transferSource" onchange="checkTransferLocations()" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                                <option value="Main_Stock" selected>Main Stock (Warehouse)</option>
+                                <option value="ANGUNAKOLA Branch">ANGUNAKOLA Branch</option>
+                                <option value="AMBALANTOTA Branch">AMBALANTOTA Branch</option>
+                                <option value="AR EMBELIPITIYA Branch">AR EMBELIPITIYA Branch</option>
+                                <option value="AR RATHNAPURA Branch">AR RATHNAPURA Branch</option>
+                                <option value="AR SURIYAWAWA Branch">AR SURIYAWAWA Branch</option>
+                                <option value="AR THISSA Branch">AR THISSA Branch</option>
+                                <option value="AR WADDUWA Branch">AR WADDUWA Branch</option>
+                                <option value="GANEMULLA Branch">GANEMULLA Branch</option>
+                                <option value="LUNUGAMVEHERA Branch">LUNUGAMVEHERA Branch</option>
+                                <option value="MONARAGALA Branch">MONARAGALA Branch</option>
+                                <option value="PADALANGALA Branch">PADALANGALA Branch</option>
+                                <option value="PUTHTHALAMA Branch">PUTHTHALAMA Branch</option>
+                                <option value="THALPITIYA Branch">THALPITIYA Branch</option>
+                                <option value="US ANURADAPURA Branch">US ANURADAPURA Branch</option>
+                                <option value="US WATHTHALA Branch">US WATHTHALA Branch</option>
+                                <option value="WADIGALA Branch">WADIGALA Branch</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Destination (To)</label>
+                            <select id="transferDestination" onchange="checkTransferLocations()" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                                 <option value="Main_Stock">Main Stock (Warehouse)</option>
                                 <option value="ANGUNAKOLA Branch">ANGUNAKOLA Branch</option>
                                 <option value="AMBALANTOTA Branch">AMBALANTOTA Branch</option>
@@ -464,79 +618,65 @@
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-                            <input type="date" id="stockDatetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                            <input type="date" id="transferDatetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
-                    <!-- NEW: Add Parts Toggle -->
                     <div class="pt-4 border-t border-gray-100">
                         <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="isPartToggle" onchange="togglePartFields()" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
-                            <span class="text-sm font-bold text-gray-800">Add Spare Parts / Accessories</span>
+                            <input type="checkbox" id="isTransferPartToggle" onchange="toggleTransferPartFields()" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
+                            <span class="text-sm font-bold text-gray-800">Transfer Spare Parts / Accessories</span>
                         </label>
                     </div>
 
-                    <!-- Vehicle details (Hidden if parts) -->
-                    <div id="vehicleFields" class="space-y-8 pt-4 border-t border-gray-100">
-                        <!-- Quick Auto-Fill -->
-                        <div class="bg-indigo-50 p-5 rounded-2xl border border-indigo-100 mb-2">
-                            <label class="block text-sm font-semibold text-indigo-800 mb-2">Quick Paste (Format)</label>
-                            <div class="flex items-stretch bg-white border border-indigo-200 rounded-xl overflow-hidden shadow-sm">
-                                <input type="text" id="quickPasteStr" placeholder="e.g. GT BLACK/ORANGE LU5.../ZB25..." class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
-                                <button type="button" onclick="parseQuickString()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap">
-                                    <i data-lucide="wand-2" class="w-4 h-4 mr-2"></i> Auto-Fill
-                                </button>
-                            </div>
-                        </div>
-
+                    <!-- Vehicle details -->
+                    <div id="transferVehicleFields" class="space-y-8 pt-4 border-t border-gray-100">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
                                 <div class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
-                                    <input type="text" id="stockChassisNo" list="stockChassisList" placeholder="Scan or Enter Chassis..." required class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
-                                    <datalist id="stockChassisList"></datalist>
-                                    <button type="button" onclick="lookupVehicle('stock')" class="hidden bg-green-600 hover:bg-green-700 text-white px-5 font-semibold transition-colors items-center whitespace-nowrap" id="btnLookupStock">
+                                    <input type="text" id="transferChassisNo" list="transferChassisList" placeholder="Scan or Enter Chassis..." required class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
+                                    <datalist id="transferChassisList"></datalist>
+                                    <button type="button" onclick="lookupVehicle('transfer')" class="bg-orange-600 hover:bg-orange-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap" id="btnLookupTransfer">
                                         <i data-lucide="search" class="w-4 h-4 mr-2"></i> Find
                                     </button>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
-                                <input type="text" id="stockEngineNo" placeholder="ENGXXXXXX" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
+                                <input type="text" id="transferEngineNo" placeholder="Auto-filled..." required class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
-                                <input type="text" id="stockModel" list="zubooModelsList" required onchange="updateColorOptions('stockModel', 'stockColorList')" placeholder="Select or type model..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
-                                <datalist id="zubooModelsList"></datalist>
+                                <input type="text" id="transferModel" list="zubooModelsList" required onchange="updateColorOptions('transferModel', 'transferColorList')" placeholder="Select or type model..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Specific Color</label>
-                                <input type="text" id="stockColor" list="stockColorList" required placeholder="Select or type color..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3.5 transition-colors">
-                                <datalist id="stockColorList"></datalist>
+                                <input type="text" id="transferColor" list="transferColorList" required placeholder="Select or type color..." class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                                <datalist id="transferColorList"></datalist>
                             </div>
                         </div>
                     </div>
 
                     <!-- Parts details (Hidden by default) -->
-                    <div id="partFields" class="hidden grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
+                    <div id="transferPartFields" class="hidden grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Item / Part Name</label>
-                            <input type="text" id="partName" list="partNameList" placeholder="e.g. Brake Pad, Mirror" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
-                            <datalist id="partNameList"></datalist>
+                            <input type="text" id="transferPartName" list="partNameList" placeholder="e.g. Brake Pad, Mirror" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Added</label>
-                            <input type="number" id="partQty" min="1" placeholder="e.g. 10" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Transferred</label>
+                            <input type="number" id="transferPartQty" min="1" placeholder="e.g. 10" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
                     <div class="pt-6 flex justify-end">
-                        <button type="submit" id="stockSubmitBtn" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-green-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
-                            <i data-lucide="arrow-up-circle" class="w-5 h-5 mr-2" id="stockSubmitIcon"></i>
-                            <span id="stockSubmitText">Update Stock</span>
+                        <button type="submit" id="transferSubmitBtn" class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-orange-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                            <i data-lucide="arrow-left-right" class="w-5 h-5 mr-2" id="transferSubmitIcon"></i>
+                            <span id="transferSubmitText">Transfer Stock</span>
                         </button>
                     </div>
                 </form>
@@ -614,7 +754,7 @@
             <!-- Tabs -->
             <div class="flex border-b border-gray-200">
                 <button onclick="switchBulkTab('sales')" id="tab-dl-sales" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50">Sales Report</button>
-                <button onclick="switchBulkTab('stock')" id="tab-dl-stock" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Stock Snapshot</button>
+                <button onclick="switchBulkTab('stock')" id="tab-dl-stock" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Detailed Stock</button>
             </div>
 
             <div class="p-6">
@@ -646,7 +786,7 @@
                 <div id="dl-stock-content" class="space-y-4 hidden">
                     <div class="bg-green-50 text-green-800 text-xs p-3 rounded-lg flex items-start border border-green-100 mb-2">
                         <i data-lucide="info" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5"></i>
-                        <p>Downloads a real-time snapshot of the current inventory summary.</p>
+                        <p>Downloads a detailed CSV report containing the Chassis and Engine numbers for all available stock.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Select Location</label>
@@ -657,7 +797,7 @@
                         </select>
                     </div>
                     <button onclick="generateStockCSV()" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
-                        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Stock Snapshot
+                        <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Detailed Stock
                     </button>
                 </div>
             </div>
@@ -805,15 +945,15 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwl09al4Gjr70lhzFVBpWdSGRh3iowoR26kcwgdoLnboEjOC1nkodNUtRTQNsEGRMrdvw/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz72i-6_Hu1cxbdW7PyaTOl20Jh9dnNZfZhmhADeOpA0zW2EGNaromwPwceC34XUjDi5A/exec"; 
         
         let globalShowroomStocks = {}; 
         let globalMainStockColors = {};
         let globalAvailableChassis = {}; 
-        let globalPartsStock = {}; // Holds spare parts logic globally
-        let globalSalesData = []; // Holds all sales data for filtering
+        let globalPartsStock = {}; 
+        let globalSalesData = []; 
+        let globalDetailedStock = []; 
 
-        // Zuboo Model to Colors Mapping
         const ZUBOO_MODELS_COLORS = {
            "Paris": ["white"],
             "KB 1": ["White"],
@@ -830,13 +970,18 @@
         lucide.createIcons();
 
         window.onload = () => {
-            const today = new Date().toISOString().split('T')[0]; // Gets YYYY-MM-DD
+            const today = new Date().toISOString().split('T')[0]; 
             document.getElementById('datetime').value = today;
-            document.getElementById('stockDatetime').value = today;
+            document.getElementById('addDatetime').value = today;
+            document.getElementById('transferDatetime').value = today;
             
-            populateModelDatalists(); // Initialize dynamic models
-            initMonthYearInputs(); // Initialize month/year filters to current date
-            toggleStockMode(); // Initialize stock form UI based on default destination
+            populateModelDatalists(); 
+            initMonthYearInputs(); 
+            
+            toggleAddPartFields();
+            toggleTransferPartFields();
+            checkTransferLocations();
+            
             switchTab('analytics');
         };
 
@@ -847,6 +992,7 @@
             const inactiveClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50";
             document.getElementById('btn-salesForm').className = inactiveClass;
             document.getElementById('btn-stockForm').className = inactiveClass;
+            document.getElementById('btn-transferForm').className = inactiveClass;
             document.getElementById('btn-analytics').className = inactiveClass;
             
             const activeClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-blue-700 bg-white shadow-sm ring-1 ring-gray-200";
@@ -856,11 +1002,10 @@
         }
 
         // --- QUICK PASTE PARSER LOGIC ---
-        function parseQuickString() {
-            const input = document.getElementById('quickPasteStr').value.trim();
+        function parseQuickStringAdd() {
+            const input = document.getElementById('addQuickPasteStr').value.trim();
             if (!input) return;
 
-            // Regex: Find a sequence of at least 10 alphanumeric chars, a slash, and then at least 5 alphanumeric chars
             const partsMatch = input.match(/([A-Z0-9]{10,})\/([A-Z0-9]{5,})/i);
             
             if (partsMatch) {
@@ -874,14 +1019,12 @@
                 let color = '';
                 const knownModels = Object.keys(ZUBOO_MODELS_COLORS);
                 
-                // Sort knownModels by length descending
                 knownModels.sort((a,b) => b.length - a.length);
                 
                 for(let m of knownModels) {
                     if (prefix.toUpperCase().startsWith(m.toUpperCase())) {
                         model = m;
-                        color = prefix.substring(m.length).trim();
-                        color = color.replace(/^[- \/]+/, '');
+                        color = prefix.substring(m.length).trim().replace(/^[- \/]+/, '');
                         break;
                     }
                 }
@@ -892,17 +1035,16 @@
                     color = splitPrefix.slice(1).join(' ').replace(/^[- \/]+/, '');
                 }
 
-                document.getElementById('stockChassisNo').value = chassis || '';
-                document.getElementById('stockEngineNo').value = engine || '';
-                document.getElementById('stockModel').value = model || '';
+                document.getElementById('addChassisNo').value = chassis || '';
+                document.getElementById('addEngineNo').value = engine || '';
+                document.getElementById('addModel').value = model || '';
                 
-                if (model) {
-                    updateColorOptions('stockModel', 'stockColorList');
-                }
-                document.getElementById('stockColor').value = color || '';
+                if (model) updateColorOptions('addModel', 'addColorList');
+                
+                document.getElementById('addColor').value = color || '';
                 
                 showNotification("Fields auto-filled successfully!", "success");
-                document.getElementById('quickPasteStr').value = '';
+                document.getElementById('addQuickPasteStr').value = '';
             } else {
                 showNotification("Could not recognize the format. Please ensure chassis/engine are present.", "error");
             }
@@ -1008,61 +1150,48 @@
                 csvContent += csvRow.join(',') + '\n';
             });
 
+            csvContent += `\n"TOTAL SALES:","${filtered.length}"\n`;
+
             downloadCSV(`Sales_Report_${branch}_${new Date().getTime()}.csv`, csvContent);
             closeBulkReportModal();
         }
 
         function generateStockCSV() {
             const branch = document.getElementById('dlStockBranch').value;
-            let csvContent = "Zuboo Stock Snapshot Report\n";
+            let csvContent = "Zuboo Detailed Stock Report\n";
             let totalRowCount = 0;
 
-            const isNestedParts = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
+            if (!globalDetailedStock || globalDetailedStock.length === 0) {
+                showNotification("No detailed stock data available. Please check backend connection.", "error");
+                return;
+            }
 
-            const processLocation = (locName, locKey, modelsObj, isMain) => {
+            const processLocation = (locName, locKey) => {
                 let locationRows = "";
                 let locCount = 0;
 
-                // 1. Models
-                Object.keys(modelsObj).forEach(mod => {
-                    if (isMain) {
-                        Object.keys(modelsObj[mod]).forEach(col => {
-                            const qty = parseInt(modelsObj[mod][col]);
-                            if (qty > 0) {
-                                const displayCol = (col === 'undefined' || col.trim() === '') ? 'Unspecified Color' : col;
-                                locationRows += `"${mod}","${displayCol}","${qty}"\n`;
-                                locCount++;
-                                totalRowCount++;
-                            }
-                        });
-                    } else {
-                        const modelData = modelsObj[mod];
-                        if (typeof modelData === 'number') {
-                            if (modelData > 0) {
-                                locationRows += `"${mod}","Unspecified Color","${modelData}"\n`;
-                                locCount++;
-                                totalRowCount++;
-                            }
-                        } else {
-                            Object.keys(modelData.colors || {}).forEach(col => {
-                                const qty = parseInt(modelData.colors[col]);
-                                if (qty > 0) {
-                                    const displayCol = (col === 'undefined' || col.trim() === '') ? 'Unspecified Color' : col;
-                                    locationRows += `"${mod}","${displayCol}","${qty}"\n`;
-                                    locCount++;
-                                    totalRowCount++;
-                                }
-                            });
+                // 1. Process Bikes for this location
+                globalDetailedStock.forEach(bike => {
+                    if (bike[0] === locKey) {
+                        let dateStr = String(bike[5] || '');
+                        if (bike[5] instanceof Date || (!isNaN(Date.parse(dateStr)) && dateStr.includes('T'))) {
+                           const d = new Date(dateStr);
+                           if(!isNaN(d)) dateStr = d.toLocaleDateString();
                         }
+                        locationRows += `"${bike[1]}","${bike[2]}","${bike[3]}","${bike[4]}","${dateStr}"\n`;
+                        locCount++;
+                        totalRowCount++;
                     }
                 });
 
-                // 2. Parts
-                let partsMap = isNestedParts ? (globalPartsStock[locKey] || {}) : (isMain ? globalPartsStock : {});
+                // 2. Process Parts for this location
+                const isNestedParts = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
+                let partsMap = isNestedParts ? (globalPartsStock[locKey] || {}) : (locKey === 'Main_Stock' ? globalPartsStock : {});
+                
                 Object.keys(partsMap).forEach(part => {
                     const qty = parseInt(partsMap[part]);
                     if (qty > 0) {
-                        locationRows += `"[PART] ${part}","N/A","${qty}"\n`;
+                        locationRows += `"[PART] ${part}","N/A","N/A","N/A","Qty: ${qty}"\n`;
                         locCount++;
                         totalRowCount++;
                     }
@@ -1070,23 +1199,20 @@
 
                 if (locCount > 0) {
                     csvContent += `\n"--- ${locName.toUpperCase()} ---"\n`;
-                    csvContent += '"Item/Model","Color","Current Quantity"\n';
+                    csvContent += '"Item/Model","Color","Chassis No","Engine No","Date Added/Received"\n';
                     csvContent += locationRows;
                 }
             };
 
-            // Main Stock
-            if (branch === 'all' || branch === 'Main_Stock') {
-                processLocation('Main Warehouse', 'Main_Stock', globalMainStockColors || {}, true);
-            }
-
-            // Showrooms
-            if (globalShowroomStocks) {
+            // Process based on selection
+            if (branch === 'all') {
+                processLocation('Main Warehouse', 'Main_Stock');
                 Object.keys(globalShowroomStocks).forEach(b => {
-                    if (branch === 'all' || branch === b) {
-                        processLocation(b.replace(/_/g, ' '), b, globalShowroomStocks[b], false);
-                    }
+                    processLocation(b.replace(/_/g, ' '), b);
                 });
+            } else {
+                const locName = branch === 'Main_Stock' ? 'Main Warehouse' : branch.replace(/_/g, ' ');
+                processLocation(locName, branch);
             }
 
             if (totalRowCount === 0) {
@@ -1094,10 +1220,11 @@
                 return;
             }
 
-            downloadCSV(`Stock_Snapshot_${branch}_${new Date().getTime()}.csv`, csvContent);
+            csvContent += `\n"TOTAL INVENTORY:","${totalRowCount}"\n`;
+
+            downloadCSV(`Detailed_Stock_Report_${branch}_${new Date().getTime()}.csv`, csvContent);
             closeBulkReportModal();
         }
-        // ----------------------------------------
 
         function populateModelDatalists() {
             const modelList = document.getElementById('zubooModelsList');
@@ -1145,7 +1272,6 @@
             list.innerHTML = '';
             
             let availableParts = new Set();
-            
             const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
             
             if (isNested) {
@@ -1170,6 +1296,7 @@
 
         function updateSaleChassisDatalist() {
             const list = document.getElementById('saleChassisList');
+            if(!list) return;
             list.innerHTML = '';
             const selectedShowroom = document.getElementById('showroom').value;
             
@@ -1182,94 +1309,121 @@
             }
         }
 
-        function updateStockChassisDatalist() {
-            const list = document.getElementById('stockChassisList');
-            const dest = document.getElementById('stockDestination').value;
-            const input = document.getElementById('stockChassisNo');
-
-            if (dest === 'Main_Stock') {
-                input.removeAttribute('list');
-                list.innerHTML = '';
-            } else {
-                input.setAttribute('list', 'stockChassisList');
-                list.innerHTML = '';
-                if (globalAvailableChassis['Main_Stock']) {
-                    globalAvailableChassis['Main_Stock'].forEach(chassis => {
-                        const opt = document.createElement('option');
-                        opt.value = chassis;
-                        list.appendChild(opt);
-                    });
-                }
+        function updateTransferChassisDatalist() {
+            const list = document.getElementById('transferChassisList');
+            if (!list) return;
+            list.innerHTML = '';
+            const source = document.getElementById('transferSource').value;
+            
+            if (source && globalAvailableChassis[source]) {
+                globalAvailableChassis[source].forEach(chassis => {
+                    const opt = document.createElement('option');
+                    opt.value = chassis;
+                    list.appendChild(opt);
+                });
             }
         }
 
-        function togglePartFields() {
-            const isPart = document.getElementById('isPartToggle').checked;
-            const vehicleFields = document.getElementById('vehicleFields');
-            const partFields = document.getElementById('partFields');
-            const infoText = document.getElementById('stockInfoText');
+        function toggleAddPartFields() {
+            const isPartToggle = document.getElementById('isAddPartToggle');
+            if(!isPartToggle) return;
+            const isPart = isPartToggle.checked;
+            const vFields = document.getElementById('addVehicleFields');
+            const pFields = document.getElementById('addPartFields');
 
             if (isPart) {
-                vehicleFields.classList.add('hidden');
-                partFields.classList.remove('hidden');
-                partFields.classList.add('grid');
+                vFields.classList.add('hidden');
+                pFields.classList.remove('hidden');
+                pFields.classList.add('grid');
                 
-                document.getElementById('stockChassisNo').required = false;
-                document.getElementById('stockEngineNo').required = false;
-                document.getElementById('stockModel').required = false;
-                document.getElementById('stockColor').required = false;
+                document.getElementById('addChassisNo').required = false;
+                document.getElementById('addEngineNo').required = false;
+                document.getElementById('addModel').required = false;
+                document.getElementById('addColor').required = false;
                 
-                document.getElementById('partName').required = true;
-                document.getElementById('partQty').required = true;
-                
-                infoText.innerHTML = "<b>Add Parts:</b> Select an existing part from the list or type a new one.";
+                document.getElementById('addPartName').required = true;
+                document.getElementById('addPartQty').required = true;
             } else {
-                vehicleFields.classList.remove('hidden');
-                partFields.classList.add('hidden');
-                partFields.classList.remove('grid');
+                vFields.classList.remove('hidden');
+                pFields.classList.add('hidden');
+                pFields.classList.remove('grid');
                 
-                document.getElementById('stockChassisNo').required = true;
-                document.getElementById('stockEngineNo').required = true;
-                document.getElementById('stockModel').required = true;
-                document.getElementById('stockColor').required = true;
+                document.getElementById('addChassisNo').required = true;
+                document.getElementById('addEngineNo').required = true;
+                document.getElementById('addModel').required = true;
+                document.getElementById('addColor').required = true;
                 
-                document.getElementById('partName').required = false;
-                document.getElementById('partQty').required = false;
-                
-                toggleStockMode();
+                document.getElementById('addPartName').required = false;
+                document.getElementById('addPartQty').required = false;
             }
         }
 
-        function toggleStockMode() {
-            if (document.getElementById('isPartToggle').checked) return; 
-            
-            const dest = document.getElementById('stockDestination').value;
-            const findBtn = document.getElementById('btnLookupStock');
-            const infoText = document.getElementById('stockInfoText');
+        function toggleTransferPartFields() {
+            const isPartToggle = document.getElementById('isTransferPartToggle');
+            if(!isPartToggle) return;
+            const isPart = isPartToggle.checked;
+            const vFields = document.getElementById('transferVehicleFields');
+            const pFields = document.getElementById('transferPartFields');
 
-            updateStockChassisDatalist();
-
-            if (dest === 'Main_Stock') {
-                findBtn.classList.add('hidden');
-                findBtn.classList.remove('flex');
-                infoText.innerHTML = "<b>New Vehicle:</b> Fill in details manually to add to Master Inventory.";
+            if (isPart) {
+                vFields.classList.add('hidden');
+                pFields.classList.remove('hidden');
+                pFields.classList.add('grid');
+                
+                document.getElementById('transferChassisNo').required = false;
+                document.getElementById('transferEngineNo').required = false;
+                document.getElementById('transferModel').required = false;
+                document.getElementById('transferColor').required = false;
+                
+                document.getElementById('transferPartName').required = true;
+                document.getElementById('transferPartQty').required = true;
             } else {
-                findBtn.classList.remove('hidden');
-                findBtn.classList.add('flex');
-                infoText.innerHTML = "<b>Transfer Vehicle:</b> Enter the Chassis Number and click <b>Find</b>.";
+                vFields.classList.remove('hidden');
+                pFields.classList.add('hidden');
+                pFields.classList.remove('grid');
+                
+                document.getElementById('transferChassisNo').required = true;
+                document.getElementById('transferEngineNo').required = true;
+                document.getElementById('transferModel').required = true;
+                document.getElementById('transferColor').required = true;
+                
+                document.getElementById('transferPartName').required = false;
+                document.getElementById('transferPartQty').required = false;
+            }
+        }
+
+        function checkTransferLocations() {
+            const source = document.getElementById('transferSource').value;
+            const dest = document.getElementById('transferDestination').value;
+            const infoText = document.getElementById('transferInfoText');
+
+            updateTransferChassisDatalist();
+
+            if (source === dest) {
+                infoText.innerHTML = `<b class="text-red-600">Warning:</b> Source and Destination are the same.`;
+            } else {
+                infoText.innerHTML = `<b>Transfer Vehicle:</b> Moving from <b>${source.replace(/_/g, ' ')}</b> to <b>${dest.replace(/_/g, ' ')}</b>.`;
             }
         }
 
         async function lookupVehicle(type) {
             if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
             
-            const chassisInput = type === 'sale' ? document.getElementById('chassisNo') : document.getElementById('stockChassisNo');
-            const btn = type === 'sale' ? document.getElementById('btnLookupSale') : document.getElementById('btnLookupStock');
-            const chassis = chassisInput.value.trim();
-            const selectedShowroom = document.getElementById('showroom').value;
+            let chassisInput, btn, expectedLoc;
             
+            if (type === 'sale') {
+                chassisInput = document.getElementById('chassisNo');
+                btn = document.getElementById('btnLookupSale');
+                expectedLoc = document.getElementById('showroom').value;
+                if(!expectedLoc) { showNotification("Please select a Location first.", "error"); return; }
+            } else if (type === 'transfer') {
+                chassisInput = document.getElementById('transferChassisNo');
+                btn = document.getElementById('btnLookupTransfer');
+                expectedLoc = document.getElementById('transferSource').value;
+            }
+
+            const chassis = chassisInput.value.trim();
             if(!chassis) { showNotification("Please enter a Chassis Number first.", "error"); return; }
-            if(type === 'sale' && !selectedShowroom) { showNotification("Please select a Location first.", "error"); return; }
             
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Wait...';
@@ -1279,7 +1433,7 @@
                 const payload = {
                     action: 'lookupChassis',
                     chassis: chassis,
-                    expectedLocation: type === 'sale' ? selectedShowroom : 'Main_Stock'
+                    expectedLocation: expectedLoc
                 };
                 
                 const response = await fetch(WEB_APP_URL, {
@@ -1290,16 +1444,23 @@
                 
                 if(result.status === 'success') {
                     if (result.data.location !== payload.expectedLocation) {
-                         showNotification(`Vehicle is currently located in ${result.data.location.replace('_', ' ')}, not ${payload.expectedLocation.replace('_', ' ')}.`, "error");
+                         showNotification(`Vehicle is currently located in ${result.data.location.replace(/_/g, ' ')}, not ${payload.expectedLocation.replace(/_/g, ' ')}.`, "error");
                          btn.innerHTML = originalHTML;
                          btn.disabled = false;
                          return;
                     }
 
-                    document.getElementById(type === 'sale' ? 'engineNo' : 'stockEngineNo').value = result.data.engine;
-                    document.getElementById(type === 'sale' ? 'model' : 'stockModel').value = result.data.model;
-                    updateColorOptions(type === 'sale' ? 'model' : 'stockModel', type === 'sale' ? 'saleColorList' : 'stockColorList');
-                    document.getElementById(type === 'sale' ? 'color' : 'stockColor').value = result.data.color;
+                    if (type === 'sale') {
+                        document.getElementById('engineNo').value = result.data.engine;
+                        document.getElementById('model').value = result.data.model;
+                        updateColorOptions('model', 'saleColorList');
+                        document.getElementById('color').value = result.data.color;
+                    } else if (type === 'transfer') {
+                        document.getElementById('transferEngineNo').value = result.data.engine;
+                        document.getElementById('transferModel').value = result.data.model;
+                        updateColorOptions('transferModel', 'transferColorList');
+                        document.getElementById('transferColor').value = result.data.color;
+                    }
                     showNotification("Vehicle details auto-filled successfully!", "success");
                 } else {
                     showNotification("Error: " + result.message, "error");
@@ -1866,54 +2027,40 @@
             }
         });
 
-        document.getElementById('newStockForm').addEventListener('submit', async function(e) {
+        document.getElementById('addStockForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL in the script!", "error"); return; }
 
-            const btn = document.getElementById('stockSubmitBtn');
-            const btnText = document.getElementById('stockSubmitText');
-            const btnIcon = document.getElementById('stockSubmitIcon');
+            const btn = document.getElementById('addSubmitBtn');
+            const btnText = document.getElementById('addSubmitText');
+            const btnIcon = document.getElementById('addSubmitIcon');
 
+            const destination = document.getElementById('addDestination').value;
+            const isPart = document.getElementById('isAddPartToggle').checked;
+            
             btn.disabled = true;
-            btnText.innerHTML = '<span class="loader border-t-white"></span> Updating...';
+            btnText.innerHTML = '<span class="loader border-t-white"></span> Adding...';
             btnIcon.style.display = 'none';
 
-            const destination = document.getElementById('stockDestination').value;
-            const isPart = document.getElementById('isPartToggle').checked;
-            
             let payload = {};
 
             if (isPart) {
                 payload = {
                     action: 'addPartStock', 
                     destination: destination,
-                    datetime: document.getElementById('stockDatetime').value,
-                    partName: document.getElementById('partName').value.trim(),
-                    quantity: parseInt(document.getElementById('partQty').value, 10)
+                    datetime: document.getElementById('addDatetime').value,
+                    partName: document.getElementById('addPartName').value.trim(),
+                    quantity: parseInt(document.getElementById('addPartQty').value, 10)
                 };
             } else {
-                const submitAction = (destination === 'Main_Stock') ? 'addStock' : 'receiveStockByChassis';
-                const recvChassis = document.getElementById('stockChassisNo').value.trim();
-
-                if (destination !== 'Main_Stock') {
-                    const availableInMain = (globalAvailableChassis['Main_Stock'] || []).map(c => String(c).toLowerCase());
-                    if (!availableInMain.includes(recvChassis.toLowerCase())) {
-                        showNotification("Error: Chassis Number not found in Main Warehouse.", "error");
-                        btn.disabled = false;
-                        btnText.innerText = 'Update Stock';
-                        btnIcon.style.display = 'block';
-                        return;
-                    }
-                }
-
                 payload = {
-                    action: submitAction,
+                    action: 'addStock',
                     destination: destination,
-                    datetime: document.getElementById('stockDatetime').value,
-                    chassisNo: recvChassis,
-                    engineNo: document.getElementById('stockEngineNo').value,
-                    model: document.getElementById('stockModel').value.trim(),
-                    color: document.getElementById('stockColor').value.trim()
+                    datetime: document.getElementById('addDatetime').value,
+                    chassisNo: document.getElementById('addChassisNo').value.trim(),
+                    engineNo: document.getElementById('addEngineNo').value,
+                    model: document.getElementById('addModel').value.trim(),
+                    color: document.getElementById('addColor').value.trim()
                 };
 
                 if (payload.model) {
@@ -1935,20 +2082,14 @@
                 const result = await response.json();
                 
                 if(result.status === 'success') {
-                    const successMsg = isPart 
-                        ? "Spare Parts / Accessories updated successfully." 
-                        : ((destination === 'Main_Stock') ? "New vehicle added to Master Inventory." : "Vehicle transfer logged successfully.");
-                    
-                    showNotification(successMsg);
-                    
+                    showNotification(isPart ? "Spare Parts / Accessories added successfully." : "New vehicle added to Master Inventory.");
                     this.reset();
-                    document.getElementById('isPartToggle').checked = false; 
-                    togglePartFields();
-                    toggleStockMode(); 
+                    document.getElementById('isAddPartToggle').checked = false; 
+                    toggleAddPartFields();
                     
                     const today = new Date().toISOString().split('T')[0];
-                    document.getElementById('stockDatetime').value = today;
-                    document.getElementById('stockColor').value = '';
+                    document.getElementById('addDatetime').value = today;
+                    document.getElementById('addColor').value = '';
                     
                     fetchAnalytics(); 
                 } else {
@@ -1957,7 +2098,102 @@
             } catch (error) { showNotification("Connection error.", "error"); } 
             finally {
                 btn.disabled = false;
-                btnText.innerText = 'Update Stock';
+                btnText.innerText = 'Add Stock';
+                btnIcon.style.display = 'block';
+            }
+        });
+
+        document.getElementById('transferStockForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL in the script!", "error"); return; }
+
+            const btn = document.getElementById('transferSubmitBtn');
+            const btnText = document.getElementById('transferSubmitText');
+            const btnIcon = document.getElementById('transferSubmitIcon');
+
+            const source = document.getElementById('transferSource').value;
+            const destination = document.getElementById('transferDestination').value;
+            const isPart = document.getElementById('isTransferPartToggle').checked;
+            
+            if (source === destination) {
+                showNotification("Error: Source and Destination cannot be the same.", "error");
+                return;
+            }
+
+            btn.disabled = true;
+            btnText.innerHTML = '<span class="loader border-t-white"></span> Transferring...';
+            btnIcon.style.display = 'none';
+
+            let payload = {};
+
+            if (isPart) {
+                payload = {
+                    action: 'addPartStock', 
+                    destination: destination,
+                    datetime: document.getElementById('transferDatetime').value,
+                    partName: document.getElementById('transferPartName').value.trim(),
+                    quantity: parseInt(document.getElementById('transferPartQty').value, 10)
+                };
+            } else {
+                const recvChassis = document.getElementById('transferChassisNo').value.trim();
+                const availableInSource = (globalAvailableChassis[source] || []).map(c => String(c).toLowerCase());
+                
+                if (!availableInSource.includes(recvChassis.toLowerCase())) {
+                    showNotification(`Error: Chassis Number not found in ${source.replace(/_/g, ' ')}.`, "error");
+                    btn.disabled = false;
+                    btnText.innerText = 'Transfer Stock';
+                    btnIcon.style.display = 'block';
+                    return;
+                }
+
+                payload = {
+                    action: 'receiveStockByChassis',
+                    sourceLocation: source,
+                    destination: destination,
+                    datetime: document.getElementById('transferDatetime').value,
+                    chassisNo: recvChassis,
+                    engineNo: document.getElementById('transferEngineNo').value,
+                    model: document.getElementById('transferModel').value.trim(),
+                    color: document.getElementById('transferColor').value.trim()
+                };
+
+                if (payload.model) {
+                    if (!ZUBOO_MODELS_COLORS[payload.model]) {
+                        ZUBOO_MODELS_COLORS[payload.model] = [];
+                    }
+                    if (payload.color && !ZUBOO_MODELS_COLORS[payload.model].includes(payload.color)) {
+                        ZUBOO_MODELS_COLORS[payload.model].push(payload.color);
+                    }
+                    populateModelDatalists(); 
+                }
+            }
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+                
+                if(result.status === 'success') {
+                    showNotification(isPart ? "Spare Parts / Accessories transferred successfully." : "Vehicle transfer logged successfully.");
+                    this.reset();
+                    document.getElementById('isTransferPartToggle').checked = false; 
+                    toggleTransferPartFields();
+                    checkTransferLocations();
+                    
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('transferDatetime').value = today;
+                    document.getElementById('transferColor').value = '';
+                    
+                    fetchAnalytics(); 
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                }
+            } catch (error) { showNotification("Connection error.", "error"); } 
+            finally {
+                btn.disabled = false;
+                btnText.innerText = 'Transfer Stock';
                 btnIcon.style.display = 'block';
             }
         });
@@ -1998,6 +2234,7 @@
                     populatePartNameDatalist();
                     
                     globalSalesData = data.sales || []; 
+                    globalDetailedStock = data.detailedStock || []; // NEW: Store Detailed Stock Info
                     
                     renderTotalStock(data.stock); 
                     renderStock(data.stock);
@@ -2007,7 +2244,7 @@
                     renderBranchStockTable();
 
                     updateSaleChassisDatalist();
-                    updateStockChassisDatalist();
+                    updateTransferChassisDatalist();
                 }
             } catch (error) {
                 console.error("Failed to fetch analytics", error);
@@ -2020,11 +2257,13 @@
 
         function renderTotalStock(mainStockArray) {
             const tbody = document.getElementById('totalStockTableBody');
+            const countSpan = document.getElementById('totalInventoryCount');
             tbody.innerHTML = '';
             
             let totalStockMap = {};
             let totalPartsMap = {};
             let totalPartsCount = 0;
+            let grandTotal = 0;
 
             // 1. Calculate Parts Stock First (Check if nested structure exists)
             const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
@@ -2070,12 +2309,15 @@
 
             const models = Object.keys(totalStockMap).sort();
             if(models.length === 0 && totalPartsCount === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No inventory found</td></tr>';
                 return;
             }
 
             models.forEach(model => {
                 const qty = totalStockMap[model];
+                grandTotal += qty;
+
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
                 
@@ -2103,6 +2345,7 @@
             
             // 4. Render Parts Dedicated Row (Highlighted)
             if (totalPartsCount > 0) {
+                grandTotal += totalPartsCount;
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
                 
@@ -2121,11 +2364,13 @@
                 tbody.appendChild(tr);
             }
 
+            if(countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
 
         function renderStock(stockArray) {
             const tbody = document.getElementById('stockTableBody');
+            const countSpan = document.getElementById('mainWarehouseCount');
             tbody.innerHTML = '';
             
             // 1. Calculate Parts for Main Warehouse
@@ -2134,8 +2379,11 @@
             let mainPartsCount = 0;
             Object.values(mainPartsMap).forEach(qty => mainPartsCount += parseInt(qty || 0));
 
+            let grandTotal = mainPartsCount;
+
             if(!stockArray || stockArray.length === 0) {
                 if (mainPartsCount === 0) {
+                    if(countSpan) countSpan.innerText = '0';
                     tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No inventory found</td></tr>';
                     return;
                 }
@@ -2143,6 +2391,9 @@
                 stockArray.forEach(row => {
                     if(row[0]) {
                         const modelName = row[0];
+                        const rowQty = parseInt(row[1] || 0);
+                        grandTotal += rowQty;
+
                         const tr = document.createElement('tr');
                         tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
                         
@@ -2162,10 +2413,10 @@
                         tdQty.className = "py-3 text-right";
                         
                         let badgeClass = "bg-green-100 text-green-700 ring-green-600/20";
-                        if (row[1] <= 2) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
-                        else if (row[1] <= 5) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+                        if (rowQty <= 2) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+                        else if (rowQty <= 5) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
 
-                        tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${row[1]}</span>`;
+                        tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${rowQty}</span>`;
                         
                         tr.appendChild(tdModel);
                         tr.appendChild(tdQty);
@@ -2194,6 +2445,7 @@
                 tbody.appendChild(tr);
             }
 
+            if(countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
 
@@ -2293,9 +2545,11 @@
 
         function renderSalesSummary(salesArray) {
             const tbody = document.getElementById('salesTableBody');
+            const countSpan = document.getElementById('salesBranchCount');
             tbody.innerHTML = '';
             
             if(!salesArray || salesArray.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No sales data found</td></tr>';
                 return;
             }
@@ -2318,12 +2572,16 @@
 
             const branches = Object.keys(branchCounts);
             if(branches.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No sales data found</td></tr>';
                 return;
             }
 
+            let grandTotal = 0;
             branches.forEach(branch => {
                 if(branch === 'Other') return;
+
+                grandTotal += branchCounts[branch];
 
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer hover:bg-gray-50 transition-colors"; 
@@ -2342,14 +2600,18 @@
                 tr.appendChild(tdCount);
                 tbody.appendChild(tr);
             });
+
+            if(countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
 
         function renderBrokerSalesSummary(salesArray) {
             const tbody = document.getElementById('brokerSalesTableBody');
+            const countSpan = document.getElementById('salesBrokerCount');
             tbody.innerHTML = '';
             
             if(!salesArray || salesArray.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No broker sales found</td></tr>';
                 return;
             }
@@ -2365,11 +2627,15 @@
 
             const brokers = Object.keys(brokerCounts);
             if(brokers.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No broker sales found</td></tr>';
                 return;
             }
 
+            let grandTotal = 0;
             brokers.forEach(broker => {
+                grandTotal += brokerCounts[broker];
+
                 const tr = document.createElement('tr');
                 const tdBroker = document.createElement('td');
                 tdBroker.className = "py-3 font-medium text-gray-800 flex items-center";
@@ -2382,6 +2648,8 @@
                 tr.appendChild(tdCount);
                 tbody.appendChild(tr);
             });
+
+            if(countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
         
@@ -2390,38 +2658,44 @@
             const dlSalesBranch = document.getElementById('dlSalesBranch');
             const dlStockBranch = document.getElementById('dlStockBranch');
             
-            const currentSelection = selector.value;
+            const currentSelection = selector ? selector.value : '';
             
             // Main selector default
-            selector.innerHTML = '<option value="">Select a branch to view...</option>';
+            if(selector) selector.innerHTML = '<option value="">Select a branch to view...</option>';
             
             // Bulk Download defaults
-            dlSalesBranch.innerHTML = '<option value="all">All Branches</option>';
-            dlStockBranch.innerHTML = '<option value="all">All Locations</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
+            if(dlSalesBranch) dlSalesBranch.innerHTML = '<option value="all">All Branches</option>';
+            if(dlStockBranch) dlStockBranch.innerHTML = '<option value="all">All Locations</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
             
             const branches = Object.keys(globalShowroomStocks);
             branches.forEach(branch => {
                 const displayName = branch.replace(/_/g, ' ');
                 
-                const option = document.createElement('option');
-                option.value = branch;
-                option.textContent = displayName;
-                selector.appendChild(option);
+                if(selector) {
+                    const option = document.createElement('option');
+                    option.value = branch;
+                    option.textContent = displayName;
+                    selector.appendChild(option);
+                }
                 
-                const sOpt = document.createElement('option');
-                sOpt.value = branch;
-                sOpt.textContent = displayName;
-                dlSalesBranch.appendChild(sOpt);
+                if(dlSalesBranch) {
+                    const sOpt = document.createElement('option');
+                    sOpt.value = branch;
+                    sOpt.textContent = displayName;
+                    dlSalesBranch.appendChild(sOpt);
+                }
                 
-                const stOpt = document.createElement('option');
-                stOpt.value = branch;
-                stOpt.textContent = displayName;
-                dlStockBranch.appendChild(stOpt);
+                if(dlStockBranch) {
+                    const stOpt = document.createElement('option');
+                    stOpt.value = branch;
+                    stOpt.textContent = displayName;
+                    dlStockBranch.appendChild(stOpt);
+                }
             });
             
-            if (branches.includes(currentSelection)) {
+            if (selector && branches.includes(currentSelection)) {
                 selector.value = currentSelection;
-            } else if (branches.length > 0) {
+            } else if (selector && branches.length > 0) {
                 selector.value = branches[0]; 
             }
         }
@@ -2429,8 +2703,10 @@
         function renderBranchStockTable() {
             const selector = document.getElementById('branchStockSelector');
             const tbody = document.getElementById('branchStockTableBody');
-            const selectedBranch = selector.value;
+            const countSpan = document.getElementById('showroomInventoryCount');
+            const selectedBranch = selector ? selector.value : null;
             
+            if(!tbody) return;
             tbody.innerHTML = '';
             
             const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
@@ -2438,8 +2714,11 @@
             let branchPartsCount = 0;
             Object.values(branchPartsMap).forEach(qty => branchPartsCount += parseInt(qty || 0));
 
+            let grandTotal = branchPartsCount;
+
             if (!selectedBranch || !globalShowroomStocks[selectedBranch]) {
                 if (branchPartsCount === 0) {
+                    if(countSpan) countSpan.innerText = '0';
                     tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">Select a branch to view its stock...</td></tr>';
                     return;
                 }
@@ -2449,6 +2728,7 @@
             const models = Object.keys(branchData);
             
             if (models.length === 0 && branchPartsCount === 0) {
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No inventory data for this branch.</td></tr>';
                 return;
             }
@@ -2468,6 +2748,8 @@
                         colorData = { "Unspecified Color": qty };
                     }
                 }
+
+                grandTotal += parseInt(qty);
                 
                 const tr = document.createElement('tr');
                 tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
@@ -2513,6 +2795,7 @@
                 tbody.appendChild(tr);
             }
 
+            if(countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
     </script>
