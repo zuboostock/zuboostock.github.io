@@ -103,8 +103,33 @@
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Changed Grid to fit 4 Columns nicely -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 mb-8">
                 
+                <!-- NEW: Total Imports Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-emerald-100 p-2 rounded-lg mr-3"><i data-lucide="truck" class="w-5 h-5 text-emerald-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Total Imports
+                            <span id="totalImportsCount" class="ml-3 bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Model / Category</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">All Units</th>
+                                </tr>
+                            </thead>
+                            <tbody id="totalImportsTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- Total Inventory Table -->
                 <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
@@ -153,7 +178,34 @@
                     </div>
                 </div>
 
-                <!-- Sales Summary Table -->
+                <!-- Pending Orders Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="clock" class="w-5 h-5 text-amber-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Pending Orders
+                            <span id="pendingOrdersCount" class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Model / Item</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingOrdersTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Summary Tables -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- Sales by Branch -->
                 <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3">
                         <div class="flex items-center">
@@ -489,10 +541,15 @@
                         </div>
                     </div>
 
-                    <div class="pt-4 border-t border-gray-100">
+                    <div class="pt-4 border-t border-gray-100 flex flex-wrap gap-6">
                         <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="isAddPartToggle" onchange="toggleAddPartFields()" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
+                            <input type="checkbox" id="isAddPartToggle" onchange="toggleAddStockModes('part')" class="w-5 h-5 text-orange-600 border-gray-300 rounded focus:ring-orange-500 transition-colors">
                             <span class="text-sm font-bold text-gray-800">Add Spare Parts / Accessories</span>
+                        </label>
+                        <!-- PENDING ORDER CHECKBOX -->
+                        <label class="flex items-center space-x-3 cursor-pointer">
+                            <input type="checkbox" id="isPendingOrderToggle" onchange="toggleAddStockModes('pending')" class="w-5 h-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500 transition-colors">
+                            <span class="text-sm font-bold text-gray-800">Add Pending Order (Bulk Quantity)</span>
                         </label>
                     </div>
 
@@ -542,6 +599,23 @@
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Added</label>
                             <input type="number" id="addPartQty" min="1" placeholder="e.g. 10" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-orange-500 focus:border-orange-500 block p-3.5 transition-colors">
+                        </div>
+                    </div>
+
+                    <!-- PENDING ORDER DETAILS (Hidden by default) -->
+                    <div id="pendingOrderFields" class="hidden grid-cols-1 md:grid-cols-3 gap-8 pt-4 border-t border-gray-100">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
+                            <input type="text" id="pendingModel" list="zubooModelsList" onchange="updateColorOptions('pendingModel', 'pendingColorList')" placeholder="Select model..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Specific Color</label>
+                            <input type="text" id="pendingColor" list="pendingColorList" placeholder="Select color..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
+                            <datalist id="pendingColorList"></datalist>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity Pending</label>
+                            <input type="number" id="pendingQty" min="1" placeholder="e.g. 5" class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-amber-500 focus:border-amber-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
@@ -697,12 +771,14 @@
     <!-- Report Generation Modal Popup -->
     <div id="reportModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="reportModalContent">
+            
             <!-- CAPTURE AREA FOR REPORT -->
             <div id="reportCard" class="bg-white w-full">
                 <div class="bg-gray-800 p-8 text-center border-b-4 border-blue-600">
                     <h3 class="text-2xl font-bold text-white mb-1">Vehicle Status Report</h3>
                     <p class="text-gray-400 text-sm">Generated by Zuboo Admin Portal</p>
                 </div>
+                
                 <div class="p-8 bg-white space-y-6">
                     <div>
                         <h4 class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">Vehicle Information</h4>
@@ -712,8 +788,18 @@
                             <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis" class="font-mono font-bold text-gray-900 text-base">-</span></div>
                             <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine" class="font-mono font-bold text-gray-900 text-base">-</span></div>
                             <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-blue-600 text-lg uppercase tracking-wide">-</span></div>
+                            
+                            <!-- Vehicle Number Field -->
+                            <div class="col-span-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 border border-gray-200 p-3 rounded-xl bg-gray-50 mt-3">
+                                <span class="text-gray-600 font-bold whitespace-nowrap"><i data-lucide="hash" class="inline w-4 h-4 mr-1"></i>Vehicle Reg No:</span>
+                                <div class="flex w-full sm:w-auto">
+                                    <input type="text" id="repVehicleNumber" placeholder="e.g. BAA-1234" class="w-full sm:w-48 bg-white border border-gray-300 text-gray-900 text-sm rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
+                                    <button type="button" onclick="saveVehicleNumber()" id="btnSaveVehicleNo" class="bg-blue-600 hover:bg-blue-700 text-white px-4 text-sm font-semibold rounded-r-lg transition-colors whitespace-nowrap">Save</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    
                     <div id="repCustomerSection" class="hidden pt-2">
                         <h4 class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">Sales & Customer Data</h4>
                         <div class="grid grid-cols-2 gap-4 text-sm">
@@ -727,6 +813,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- ACTIONS -->
             <div class="p-6 bg-gray-50 flex gap-3 border-t border-gray-200">
                 <button onclick="downloadReportPDF()" id="btnDownloadPdf" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
@@ -736,6 +823,7 @@
                     Close
                 </button>
             </div>
+            
         </div>
     </div>
 
@@ -807,17 +895,20 @@
     <!-- Success Modal Popup -->
     <div id="successModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
         <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="successModalContent">
+            
             <!-- CAPTURE AREA -->
             <div id="receiptCard" class="bg-white w-full">
                 <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center relative overflow-hidden">
                     <div class="absolute -top-6 -right-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
                     <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
+                    
                     <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg relative z-10">
                         <i data-lucide="party-popper" class="w-10 h-10 text-blue-600"></i>
                     </div>
                     <h3 class="text-3xl font-extrabold text-white mb-2 relative z-10">Sale Completed!</h3>
                     <p class="text-blue-100 font-medium text-lg relative z-10">Thank you for choosing Zuboo .</p>
                 </div>
+                
                 <div class="p-8 bg-gray-50">
                     <div class="space-y-4">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200 hidden" id="modalBrokerRow">
@@ -847,6 +938,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- ACTIONS -->
             <div class="p-8 pt-0 bg-gray-50 flex flex-col gap-3">
                 <div class="flex gap-2">
@@ -861,10 +953,11 @@
                     Close Window
                 </button>
             </div>
+            
         </div>
     </div>
     
-    <!-- Single Location Color Breakdown Modal Popup -->
+    <!-- Color Breakdown Modal Popup -->
     <div id="colorModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="colorModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
@@ -924,7 +1017,7 @@
         </div>
     </div>
 
-    <!-- NEW: Branch Sales Breakdown Modal -->
+    <!-- Branch Sales Breakdown Modal -->
     <div id="branchSalesModal" class="hidden fixed inset-0 z-[117] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
         <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="branchSalesModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-purple-50/50 flex items-center justify-between">
@@ -945,7 +1038,7 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz72i-6_Hu1cxbdW7PyaTOl20Jh9dnNZfZhmhADeOpA0zW2EGNaromwPwceC34XUjDi5A/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXalrNVH9ax6FtEAk6IwcTgIvecKZ7tj6f2rg1CLWhbPuXht2PT555NlbsJ7f_CXuJUA/exec"; 
         
         let globalShowroomStocks = {}; 
         let globalMainStockColors = {};
@@ -953,7 +1046,10 @@
         let globalPartsStock = {}; 
         let globalSalesData = []; 
         let globalDetailedStock = []; 
+        let globalPendingOrders = {}; 
+        let globalTotalImports = {}; // NEW: Variable to hold import data
 
+        // Zuboo Model to Colors Mapping
         const ZUBOO_MODELS_COLORS = {
            "Paris": ["white"],
             "KB 1": ["White"],
@@ -970,7 +1066,7 @@
         lucide.createIcons();
 
         window.onload = () => {
-            const today = new Date().toISOString().split('T')[0]; 
+            const today = new Date().toISOString().split('T')[0]; // Gets YYYY-MM-DD
             document.getElementById('datetime').value = today;
             document.getElementById('addDatetime').value = today;
             document.getElementById('transferDatetime').value = today;
@@ -978,8 +1074,7 @@
             populateModelDatalists(); 
             initMonthYearInputs(); 
             
-            toggleAddPartFields();
-            toggleTransferPartFields();
+            toggleAddStockModes(''); // Initialize correct Add Stock form fields
             checkTransferLocations();
             
             switchTab('analytics');
@@ -1172,6 +1267,7 @@
 
                 // 1. Process Bikes for this location
                 globalDetailedStock.forEach(bike => {
+                    // bike array mapping: [location, model, color, chassis, engine, date]
                     if (bike[0] === locKey) {
                         let dateStr = String(bike[5] || '');
                         if (bike[5] instanceof Date || (!isNaN(Date.parse(dateStr)) && dateStr.includes('T'))) {
@@ -1324,37 +1420,72 @@
             }
         }
 
-        function toggleAddPartFields() {
-            const isPartToggle = document.getElementById('isAddPartToggle');
-            if(!isPartToggle) return;
-            const isPart = isPartToggle.checked;
+        function toggleAddStockModes(clickedType) {
+            const partToggle = document.getElementById('isAddPartToggle');
+            const pendingToggle = document.getElementById('isPendingOrderToggle');
+            
+            if(!partToggle || !pendingToggle) return;
+
+            if (clickedType === 'part' && partToggle.checked) {
+                pendingToggle.checked = false;
+            } else if (clickedType === 'pending' && pendingToggle.checked) {
+                partToggle.checked = false;
+            }
+
+            const isPart = partToggle.checked;
+            const isPending = pendingToggle.checked;
+            
             const vFields = document.getElementById('addVehicleFields');
             const pFields = document.getElementById('addPartFields');
+            const poFields = document.getElementById('pendingOrderFields');
+
+            // Reset all required statuses
+            document.getElementById('addChassisNo').required = false;
+            document.getElementById('addEngineNo').required = false;
+            document.getElementById('addModel').required = false;
+            document.getElementById('addColor').required = false;
+            
+            document.getElementById('addPartName').required = false;
+            document.getElementById('addPartQty').required = false;
+            
+            document.getElementById('pendingModel').required = false;
+            document.getElementById('pendingQty').required = false;
 
             if (isPart) {
                 vFields.classList.add('hidden');
+                poFields.classList.add('hidden');
+                poFields.classList.remove('grid');
+                
                 pFields.classList.remove('hidden');
                 pFields.classList.add('grid');
                 
-                document.getElementById('addChassisNo').required = false;
-                document.getElementById('addEngineNo').required = false;
-                document.getElementById('addModel').required = false;
-                document.getElementById('addColor').required = false;
-                
                 document.getElementById('addPartName').required = true;
                 document.getElementById('addPartQty').required = true;
-            } else {
-                vFields.classList.remove('hidden');
+                document.getElementById('addSubmitText').innerText = "Add Parts";
+            } else if (isPending) {
+                vFields.classList.add('hidden');
                 pFields.classList.add('hidden');
                 pFields.classList.remove('grid');
+                
+                poFields.classList.remove('hidden');
+                poFields.classList.add('grid');
+                
+                document.getElementById('pendingModel').required = true;
+                document.getElementById('pendingQty').required = true;
+                document.getElementById('addSubmitText').innerText = "Add Pending Order";
+            } else {
+                pFields.classList.add('hidden');
+                pFields.classList.remove('grid');
+                poFields.classList.add('hidden');
+                poFields.classList.remove('grid');
+                
+                vFields.classList.remove('hidden');
                 
                 document.getElementById('addChassisNo').required = true;
                 document.getElementById('addEngineNo').required = true;
                 document.getElementById('addModel').required = true;
                 document.getElementById('addColor').required = true;
-                
-                document.getElementById('addPartName').required = false;
-                document.getElementById('addPartQty').required = false;
+                document.getElementById('addSubmitText').innerText = "Add Stock";
             }
         }
 
@@ -1512,6 +1643,11 @@
             document.getElementById('repEngine').textContent = data.engine || 'N/A';
             document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
             
+            const vehicleNumberInput = document.getElementById('repVehicleNumber');
+            if (vehicleNumberInput) {
+                vehicleNumberInput.value = data.vehicleNumber || data.vehicleNo || '';
+            }
+            
             const custSection = document.getElementById('repCustomerSection');
             if (data.isSold) {
                 custSection.classList.remove('hidden');
@@ -1574,6 +1710,49 @@
                 showNotification("Failed to generate PDF.", "error");
             } finally {
                 btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        async function saveVehicleNumber() {
+            if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
+            
+            const chassis = document.getElementById('repChassis').textContent;
+            const vehicleNo = document.getElementById('repVehicleNumber').value.trim();
+
+            if(!chassis || chassis === '-' || chassis === 'N/A') {
+                showNotification("No chassis number found to update.", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveVehicleNo');
+            const originalText = btn.innerText;
+            btn.innerHTML = '<span class="loader !w-3 !h-3 !mr-0 !border-t-white"></span>';
+            btn.disabled = true;
+
+            try {
+                const payload = { action: 'updateVehicleNumber', chassis: chassis, vehicleNumber: vehicleNo };
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST', body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await response.json();
+
+                if(result.status === 'success') {
+                    showNotification("Vehicle registration number updated successfully!", "success");
+                    btn.innerText = 'Saved!';
+                    setTimeout(() => { 
+                        btn.innerText = originalText; 
+                        btn.disabled = false; 
+                    }, 2000);
+                } else {
+                    showNotification("Error: " + result.message, "error");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            } catch(e) {
+                showNotification("Connection error saving vehicle number.", "error");
+                btn.innerText = originalText;
                 btn.disabled = false;
             }
         }
@@ -1976,7 +2155,7 @@
             
             const availableInBranch = (globalAvailableChassis[selectedShowroom] || []).map(c => String(c).toLowerCase());
             if (!availableInBranch.includes(soldChassis.toLowerCase())) {
-                showNotification(`Error: Chassis Number is not available in ${selectedShowroom.replace('_', ' ')}.`, "error");
+                showNotification(`Error: Chassis Number is not available in ${selectedShowroom.replace(/_/g, ' ')}.`, "error");
                 btn.disabled = false;
                 btnText.innerText = 'Complete Sale';
                 btnIcon.style.display = 'block';
@@ -2037,6 +2216,7 @@
 
             const destination = document.getElementById('addDestination').value;
             const isPart = document.getElementById('isAddPartToggle').checked;
+            const isPending = document.getElementById('isPendingOrderToggle').checked;
             
             btn.disabled = true;
             btnText.innerHTML = '<span class="loader border-t-white"></span> Adding...';
@@ -2052,6 +2232,25 @@
                     partName: document.getElementById('addPartName').value.trim(),
                     quantity: parseInt(document.getElementById('addPartQty').value, 10)
                 };
+            } else if (isPending) {
+                payload = {
+                    action: 'addPendingOrder',
+                    destination: destination,
+                    datetime: document.getElementById('addDatetime').value,
+                    model: document.getElementById('pendingModel').value.trim(),
+                    color: document.getElementById('pendingColor').value.trim(),
+                    quantity: parseInt(document.getElementById('pendingQty').value, 10)
+                };
+
+                if (payload.model) {
+                    if (!ZUBOO_MODELS_COLORS[payload.model]) {
+                        ZUBOO_MODELS_COLORS[payload.model] = [];
+                    }
+                    if (payload.color && !ZUBOO_MODELS_COLORS[payload.model].includes(payload.color)) {
+                        ZUBOO_MODELS_COLORS[payload.model].push(payload.color);
+                    }
+                    populateModelDatalists(); 
+                }
             } else {
                 payload = {
                     action: 'addStock',
@@ -2082,14 +2281,21 @@
                 const result = await response.json();
                 
                 if(result.status === 'success') {
-                    showNotification(isPart ? "Spare Parts / Accessories added successfully." : "New vehicle added to Master Inventory.");
+                    let msg = "New vehicle added to Master Inventory.";
+                    if(isPart) msg = "Spare Parts / Accessories added successfully.";
+                    if(isPending) msg = "Pending Bulk Order added successfully.";
+                    
+                    showNotification(msg);
                     this.reset();
+                    
                     document.getElementById('isAddPartToggle').checked = false; 
-                    toggleAddPartFields();
+                    document.getElementById('isPendingOrderToggle').checked = false; 
+                    toggleAddStockModes('');
                     
                     const today = new Date().toISOString().split('T')[0];
                     document.getElementById('addDatetime').value = today;
                     document.getElementById('addColor').value = '';
+                    document.getElementById('pendingColor').value = '';
                     
                     fetchAnalytics(); 
                 } else {
@@ -2221,6 +2427,8 @@
                     globalMainStockColors = data.mainStockColors || {}; 
                     globalAvailableChassis = data.availableChassis || {};
                     globalPartsStock = data.partsStock || {}; 
+                    globalPendingOrders = data.pendingOrders || {}; 
+                    globalTotalImports = data.totalImports || {}; // NEW: Map Total Imports
                     
                     Object.keys(globalMainStockColors).forEach(model => {
                         if (!ZUBOO_MODELS_COLORS[model]) ZUBOO_MODELS_COLORS[model] = [];
@@ -2230,14 +2438,17 @@
                             }
                         });
                     });
+                    
                     populateModelDatalists(); 
                     populatePartNameDatalist();
                     
                     globalSalesData = data.sales || []; 
-                    globalDetailedStock = data.detailedStock || []; // NEW: Store Detailed Stock Info
+                    globalDetailedStock = data.detailedStock || []; 
                     
+                    renderTotalImports(); // NEW: Call function to render imports
                     renderTotalStock(data.stock); 
                     renderStock(data.stock);
+                    renderPendingOrders();
                     applySalesFilter(); 
                     
                     populateBranchSelector();
@@ -2251,6 +2462,88 @@
             } finally {
                 refreshIcon.classList.remove('animate-spin');
             }
+        }
+        
+        function renderTotalImports() {
+            const tbody = document.getElementById('totalImportsTableBody');
+            const countSpan = document.getElementById('totalImportsCount');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+            
+            const models = Object.keys(globalTotalImports || {}).sort();
+            
+            if (models.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No import data found.</td></tr>';
+                return;
+            }
+
+            models.forEach(model => {
+                const qty = parseInt(globalTotalImports[model]) || 0;
+                if(qty > 0) {
+                    grandTotal += qty;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-3 font-medium text-gray-800";
+                    tdModel.innerText = model;
+                    
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-3 text-right";
+                    tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-emerald-100 text-emerald-800 ring-emerald-600/20">${qty}</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
+                }
+            });
+            
+            if(countSpan) countSpan.innerText = grandTotal;
+        }
+
+        function renderPendingOrders() {
+            const tbody = document.getElementById('pendingOrdersTableBody');
+            const countSpan = document.getElementById('pendingOrdersCount');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+            
+            const models = Object.keys(globalPendingOrders || {});
+            
+            if (models.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No pending orders found.</td></tr>';
+                return;
+            }
+
+            models.forEach(model => {
+                const qty = parseInt(globalPendingOrders[model]) || 0;
+                if(qty > 0) {
+                    grandTotal += qty;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-3 font-medium text-gray-800";
+                    tdModel.innerText = model;
+                    
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-3 text-right";
+                    tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-amber-100 text-amber-800 ring-amber-600/20">${qty}</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
+                }
+            });
+            
+            if(countSpan) countSpan.innerText = grandTotal;
         }
 
         // --- RENDER FUNCTIONS FOR TABLES ---

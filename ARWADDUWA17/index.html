@@ -1,4 +1,4 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -102,8 +102,8 @@
                 </button>
             </div>
 
+            <!-- Sales Widget -->
             <div class="grid grid-cols-1 mb-8">
-                <!-- Clickable Sales Widget with Filter -->
                 <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex flex-col justify-center transition-colors relative">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-6">
                         
@@ -155,41 +155,73 @@
                                 <input type="date" id="branchSalesFilterEnd" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
 
+            <!-- Side by Side Tables: Stock and Pending Orders -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                
+                <!-- Current Available Stock -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-teal-600"></i></div>
+                            <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                                Current Available Stock
+                                <span id="showroomInventoryCount" class="ml-3 bg-teal-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            </h3>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Zuboo Bike Model / Category</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Units In Store</th>
+                                </tr>
+                            </thead>
+                            <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- NEW: Pending Orders Table -->
+                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                    <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="clock" class="w-5 h-5 text-amber-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Pending Bulk Orders
+                            <span id="pendingOrdersCount" class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
+                    </div>
+                    <div class="overflow-x-auto flex-grow p-6">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead>
+                                <tr class="text-gray-500 border-b border-gray-200">
+                                    <th scope="col" class="pb-3 font-semibold">Model / Item</th>
+                                    <th scope="col" class="pb-3 font-semibold text-right">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingOrdersTableBody" class="divide-y divide-gray-100">
+                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Generate Data Report Tool -->
             <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
-                <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-                    <div class="flex items-center">
-                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-teal-600"></i></div>
-                        <h3 class="text-lg font-bold text-gray-800">Current Available Stock</h3>
-                    </div>
-                </div>
-                <div class="overflow-x-auto flex-grow p-6">
-                    <table class="min-w-full text-left text-sm whitespace-nowrap">
-                        <thead>
-                            <tr class="text-gray-500 border-b border-gray-200">
-                                <th scope="col" class="pb-3 font-semibold">Zuboo Bike Model / Category</th>
-                                <th scope="col" class="pb-3 font-semibold text-right">Units In Store</th>
-                            </tr>
-                        </thead>
-                        <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
-                            <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Generate Data Report Tool (At the bottom of the Dashboard) -->
-            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col mt-8">
                 <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="file-search" class="w-5 h-5 text-teal-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">Generate Data Report (PDF)</h3>
                     </div>
-                    <!-- NEW BULK EXPORT BUTTON -->
+                    <!-- BULK EXPORT BUTTON -->
                     <button onclick="openBulkReportModal()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
                         <i data-lucide="download" class="w-4 h-4 mr-2"></i> Bulk Export CSV
                     </button>
@@ -334,16 +366,19 @@
                 </div>
                 
                 <div class="p-8 bg-white space-y-6">
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">Vehicle Information</h4>
-                        <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div><span class="text-gray-500 block mb-1">Model:</span> <span id="repModel" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Color:</span> <span id="repColor" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis" class="font-mono font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine" class="font-mono font-bold text-gray-900 text-base">-</span></div>
-                            <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-teal-600 text-lg uppercase tracking-wide">-</span></div>
-                        </div>
-                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm">
+    <div><span class="text-gray-500 block mb-1">Model:</span> <span id="repModel" class="font-bold text-gray-900 text-base">-</span></div>
+    <div><span class="text-gray-500 block mb-1">Color:</span> <span id="repColor" class="font-bold text-gray-900 text-base">-</span></div>
+    <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis" class="font-mono font-bold text-gray-900 text-base">-</span></div>
+    <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine" class="font-mono font-bold text-gray-900 text-base">-</span></div>
+    
+    <div id="repVehicleNoContainer" class="col-span-2 hidden bg-teal-50 border border-teal-100 p-3 rounded-lg mt-1">
+        <span class="text-teal-800 block mb-1 text-xs font-bold uppercase tracking-wider">Registered Vehicle No:</span> 
+        <span id="repVehicleNo" class="font-mono font-bold text-teal-900 text-lg">-</span>
+    </div>
+
+    <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-teal-600 text-lg uppercase tracking-wide">-</span></div>
+</div>
                     
                     <div id="repCustomerSection" class="hidden pt-2">
                         <h4 class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">Sales & Customer Data</h4>
@@ -552,13 +587,8 @@
         // CONFIGURATION: EDIT THESE THREE CONSTANTS FOR EACH BRANCH YOU SET UP
         // =========================================================================
         
-        // 1. Paste your Google Apps Script URL here between the quotes
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz72i-6_Hu1cxbdW7PyaTOl20Jh9dnNZfZhmhADeOpA0zW2EGNaromwPwceC34XUjDi5A/exec"; 
-        
-        // 2. The exact name of the tab in your Google Sheet for this branch (e.g., Showroom_A)
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXalrNVH9ax6FtEAk6IwcTgIvecKZ7tj6f2rg1CLWhbPuXht2PT555NlbsJ7f_CXuJUA/exec"; 
         const CURRENT_BRANCH = "AR WADDUWA Branch"; 
-        
-        // 3. The friendly display name you want the staff to see (e.g., Colombo Branch)
         const BRANCH_DISPLAY_NAME = "AR WADDUWA Branch"; 
 
         // =========================================================================
@@ -567,7 +597,8 @@
         let globalAvailableChassis = {}; 
         let globalPartsStock = {}; 
         let globalSalesData = []; 
-        let globalDetailedStock = []; 
+        let globalDetailedStock = {}; 
+        let globalPendingOrders = {};
 
         const ZUBOO_MODELS_COLORS = {
              "Paris": ["white"],
@@ -590,15 +621,13 @@
             const localISODate = tzNow.toISOString().slice(0,10);
             document.getElementById('datetime').value = localISODate;
 
-            // Automatically set branch field
             document.getElementById('displayBranchSale').value = BRANCH_DISPLAY_NAME;
-            
             document.querySelectorAll('.branch-display-name').forEach(el => {
                 el.textContent = BRANCH_DISPLAY_NAME;
             });
 
-            populateModelDatalists();
             initMonthYearInputs();
+            populateModelDatalists(); 
             switchTab('analytics');
         };
 
@@ -614,6 +643,17 @@
             document.getElementById('btn-' + tabId).className = activeClass;
 
             if(tabId === 'analytics') { fetchAnalytics(); }
+        }
+
+        function initMonthYearInputs() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
+
+            const yearEl = document.getElementById('branchSalesFilterYear');
+            const monthEl = document.getElementById('branchSalesFilterMonthOnly');
+            if (yearEl) yearEl.value = currentYear;
+            if (monthEl) monthEl.value = currentMonthStr;
         }
 
         function populateModelDatalists() {
@@ -633,7 +673,6 @@
             if (!colorDatalist) return;
             
             colorDatalist.innerHTML = '';
-            
             if (modelValue && ZUBOO_MODELS_COLORS[modelValue]) {
                 ZUBOO_MODELS_COLORS[modelValue].forEach(color => {
                     const opt = document.createElement('option');
@@ -645,6 +684,7 @@
 
         function updateSaleChassisDatalist() {
             const list = document.getElementById('saleChassisList');
+            if(!list) return;
             list.innerHTML = '';
             if (globalAvailableChassis[CURRENT_BRANCH]) {
                 globalAvailableChassis[CURRENT_BRANCH].forEach(chassis => {
@@ -672,7 +712,6 @@
                 iconEl.setAttribute('data-lucide', 'alert-circle');
                 iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-red-500');
             }
-            
             lucide.createIcons();
             banner.classList.remove('hidden');
             setTimeout(() => { banner.classList.add('hidden'); }, 6000);
@@ -777,7 +816,6 @@
             }
         }
 
-        // --- Generate Data Report Logic ---
         async function generateReport() {
             if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
             const query = document.getElementById('reportSearchQuery').value.trim();
@@ -810,37 +848,51 @@
         }
         
         function populateReportModal(data) {
-            document.getElementById('repModel').textContent = data.model || 'N/A';
-            document.getElementById('repColor').textContent = data.color || 'N/A';
-            document.getElementById('repChassis').textContent = data.chassis || 'N/A';
-            document.getElementById('repEngine').textContent = data.engine || 'N/A';
-            document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
-            
-            const custSection = document.getElementById('repCustomerSection');
-            if (data.isSold) {
-                custSection.classList.remove('hidden');
-                document.getElementById('repCustomer').textContent = data.customerName || 'N/A';
-                document.getElementById('repNIC').textContent = data.nic || 'N/A';
-                document.getElementById('repInvoice').textContent = data.invoiceNo || 'N/A';
-                
-                const d = new Date(data.saleDate);
-                document.getElementById('repDate').textContent = isNaN(d) ? data.saleDate : d.toLocaleDateString();
-                document.getElementById('repBranch').textContent = data.branch ? data.branch.replace(/_/g, ' ') : 'N/A';
-                document.getElementById('repBroker').textContent = data.brokerName || 'None';
-            } else {
-                custSection.classList.add('hidden');
-            }
-            
-            const modal = document.getElementById('reportModal');
-            const content = document.getElementById('reportModalContent');
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('scale-95', 'opacity-0');
-                content.classList.add('scale-100', 'opacity-100');
-            }, 10);
-            
-            lucide.createIcons();
-        }
+    document.getElementById('repModel').textContent = data.model || 'N/A';
+    document.getElementById('repColor').textContent = data.color || 'N/A';
+    document.getElementById('repChassis').textContent = data.chassis || 'N/A';
+    document.getElementById('repEngine').textContent = data.engine || 'N/A';
+    
+    // NEW: Handle conditional display of Vehicle Number
+    const vehicleContainer = document.getElementById('repVehicleNoContainer');
+    const vehicleEl = document.getElementById('repVehicleNo');
+    
+    // Check if vehicleNo exists in the backend response and isn't empty
+    if (data.vehicleNo && data.vehicleNo.toString().trim() !== '') {
+        vehicleEl.textContent = data.vehicleNo;
+        vehicleContainer.classList.remove('hidden');
+    } else {
+        vehicleContainer.classList.add('hidden');
+        vehicleEl.textContent = '-';
+    }
+
+    document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
+    
+    const custSection = document.getElementById('repCustomerSection');
+    if (data.isSold) {
+        custSection.classList.remove('hidden');
+        document.getElementById('repCustomer').textContent = data.customerName || 'N/A';
+        document.getElementById('repNIC').textContent = data.nic || 'N/A';
+        document.getElementById('repInvoice').textContent = data.invoiceNo || 'N/A';
+        
+        const d = new Date(data.saleDate);
+        document.getElementById('repDate').textContent = isNaN(d) ? data.saleDate : d.toLocaleDateString();
+        document.getElementById('repBranch').textContent = data.branch ? data.branch.replace(/_/g, ' ') : 'N/A';
+        document.getElementById('repBroker').textContent = data.brokerName || 'None';
+    } else {
+        custSection.classList.add('hidden');
+    }
+    
+    const modal = document.getElementById('reportModal');
+    const content = document.getElementById('reportModalContent');
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        content.classList.remove('scale-95', 'opacity-0');
+        content.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
+    lucide.createIcons();
+}
         
         function closeReportModal() {
             const modal = document.getElementById('reportModal');
@@ -966,7 +1018,9 @@
                 'this_month': 'Current Month',
                 'today': 'Today',
                 'this_year': 'This Year',
-                'all': 'All Time'
+                'all': 'All Time',
+                'specific_month': 'Specific Month',
+                'custom_range': 'Custom Range'
             };
             const filterLabel = filterMap[filterType] || 'Current Month';
             
@@ -1202,7 +1256,7 @@
             }
 
             let filtered = globalSalesData.filter(row => {
-                if (row[1] !== branch) return false; // Ensure only this branch
+                if (row[1] !== branch) return false; 
                 
                 const saleDate = new Date(row[0]);
                 if (!isNaN(saleDate.getTime())) {
@@ -1257,7 +1311,6 @@
                 let locationRows = "";
                 let locCount = 0;
 
-                // 1. Process Bikes for this location
                 globalDetailedStock.forEach(bike => {
                     if (bike[0] === locKey) {
                         let dateStr = String(bike[5] || '');
@@ -1271,7 +1324,6 @@
                     }
                 });
 
-                // 2. Process Parts for this location
                 const isNestedParts = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
                 let partsMap = isNestedParts ? (globalPartsStock[locKey] || {}) : (locKey === 'Main_Stock' ? globalPartsStock : {});
                 
@@ -1304,17 +1356,6 @@
             closeBulkReportModal();
         }
 
-        function initMonthYearInputs() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
-
-            const yearEl = document.getElementById('branchSalesFilterYear');
-            const monthEl = document.getElementById('branchSalesFilterMonthOnly');
-            if (yearEl) yearEl.value = currentYear;
-            if (monthEl) monthEl.value = currentMonthStr;
-        }
-
         async function fetchAnalytics() {
             if (!WEB_APP_URL) { return; }
             const refreshIcon = document.getElementById('refreshIcon');
@@ -1330,23 +1371,11 @@
                     globalShowroomStocks = data.showroomStocks || {};
                     globalAvailableChassis = data.availableChassis || {};
                     globalPartsStock = data.partsStock || {}; 
-                    globalMainStockColors = data.mainStockColors || {}; 
-                    
-                    Object.keys(globalMainStockColors).forEach(model => {
-                        if (!ZUBOO_MODELS_COLORS[model]) ZUBOO_MODELS_COLORS[model] = [];
-                        Object.keys(globalMainStockColors[model]).forEach(color => {
-                            if (color && color !== "undefined" && color !== "Unspecified Color" && !ZUBOO_MODELS_COLORS[model].includes(color)) {
-                                ZUBOO_MODELS_COLORS[model].push(color);
-                            }
-                        });
-                    });
-                    
-                    populateModelDatalists(); 
-
                     globalSalesData = data.sales || []; 
                     globalDetailedStock = data.detailedStock || []; 
+                    globalPendingOrders = data.pendingOrders || {};
                     
-                    renderMyDashboard(data);
+                    renderMyDashboard();
                     updateSaleChassisDatalist();
                 }
             } catch (error) {
@@ -1449,7 +1478,7 @@
             }
         }
 
-        function renderMyDashboard(data) {
+        function renderMyDashboard() {
             applyBranchSalesFilter();
 
             const tbody = document.getElementById('branchStockTableBody');
@@ -1462,69 +1491,119 @@
 
             const myStock = (globalShowroomStocks && globalShowroomStocks[CURRENT_BRANCH]) ? globalShowroomStocks[CURRENT_BRANCH] : {};
             const models = Object.keys(myStock);
+            let grandTotal = branchPartsCount;
 
             if (models.length === 0 && branchPartsCount === 0) {
+                const countSpan = document.getElementById('showroomInventoryCount');
+                if(countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No inventory data found for this branch.</td></tr>';
+            } else {
+                models.forEach(model => {
+                    const modelInfo = myStock[model];
+                    let qty = 0;
+                    let colorData = {};
+                    
+                    if (typeof modelInfo === 'number') {
+                        qty = modelInfo;
+                        colorData = { "Unspecified Color": qty };
+                    } else {
+                        qty = modelInfo.total || 0;
+                        colorData = modelInfo.colors || {};
+                        if (Object.keys(colorData).length === 0) colorData = { "Unspecified Color": qty };
+                    }
+                    
+                    grandTotal += parseInt(qty);
+
+                    const tr = document.createElement('tr');
+                    tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
+                    tr.onclick = () => { showColorModal(model + " (" + BRANCH_DISPLAY_NAME + ")", colorData); };
+
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
+                    tdModel.innerHTML = `${model} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
+                    
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-3 text-right";
+                    
+                    let badgeClass = "bg-teal-100 text-teal-800 ring-teal-600/20";
+                    if (qty <= 0) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+                    else if (qty <= 2) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+
+                    tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
+                });
+                
+                if (branchPartsCount > 0) {
+                    const tr = document.createElement('tr');
+                    tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
+                    
+                    tr.onclick = () => showPartsModal(BRANCH_DISPLAY_NAME, branchPartsMap);
+                    
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-4 font-bold text-orange-800 flex items-center";
+                    tdModel.innerHTML = `<i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>`;
+                    
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-4 text-right";
+                    tdQty.innerHTML = `<span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
+                }
+                
+                const countSpan = document.getElementById('showroomInventoryCount');
+                if(countSpan) countSpan.innerText = grandTotal;
+            }
+
+            renderPendingOrders();
+            lucide.createIcons();
+        }
+
+        function renderPendingOrders() {
+            const tbody = document.getElementById('pendingOrdersTableBody');
+            const countSpan = document.getElementById('pendingOrdersCount');
+            if(!tbody) return;
+            
+            tbody.innerHTML = '';
+            let grandTotal = 0;
+            
+            const models = Object.keys(globalPendingOrders || {});
+            
+            if (models.length === 0) {
+                if(countSpan) countSpan.innerText = '0';
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No pending orders found.</td></tr>';
                 return;
             }
 
             models.forEach(model => {
-                const modelInfo = myStock[model];
-                let qty = 0;
-                let colorData = {};
-                
-                if (typeof modelInfo === 'number') {
-                    qty = modelInfo;
-                    colorData = { "Unspecified Color": qty };
-                } else {
-                    qty = modelInfo.total || 0;
-                    colorData = modelInfo.colors || {};
-                    if (Object.keys(colorData).length === 0) colorData = { "Unspecified Color": qty };
+                const qty = parseInt(globalPendingOrders[model]) || 0;
+                if(qty > 0) {
+                    grandTotal += qty;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    
+                    const tdModel = document.createElement('td');
+                    tdModel.className = "py-3 font-medium text-gray-800";
+                    tdModel.innerText = model;
+                    
+                    const tdQty = document.createElement('td');
+                    tdQty.className = "py-3 text-right";
+                    tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-amber-100 text-amber-800 ring-amber-600/20">${qty}</span>`;
+                    
+                    tr.appendChild(tdModel);
+                    tr.appendChild(tdQty);
+                    tbody.appendChild(tr);
                 }
-                
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
-                tr.onclick = () => { showColorModal(model + " (" + BRANCH_DISPLAY_NAME + ")", colorData); };
-
-                const tdModel = document.createElement('td');
-                tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
-                tdModel.innerHTML = `${model} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
-                
-                const tdQty = document.createElement('td');
-                tdQty.className = "py-3 text-right";
-                
-                let badgeClass = "bg-teal-100 text-teal-800 ring-teal-600/20";
-                if (qty <= 0) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
-                else if (qty <= 2) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
-
-                tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
-                
-                tr.appendChild(tdModel);
-                tr.appendChild(tdQty);
-                tbody.appendChild(tr);
             });
             
-            if (branchPartsCount > 0) {
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
-                
-                tr.onclick = () => showPartsModal(BRANCH_DISPLAY_NAME, branchPartsMap);
-                
-                const tdModel = document.createElement('td');
-                tdModel.className = "py-4 font-bold text-orange-800 flex items-center";
-                tdModel.innerHTML = `<i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>`;
-                
-                const tdQty = document.createElement('td');
-                tdQty.className = "py-4 text-right";
-                tdQty.innerHTML = `<span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>`;
-                
-                tr.appendChild(tdModel);
-                tr.appendChild(tdQty);
-                tbody.appendChild(tr);
-            }
-
-            lucide.createIcons();
+            if(countSpan) countSpan.innerText = grandTotal;
         }
+
     </script>
 </body>
 </html>
