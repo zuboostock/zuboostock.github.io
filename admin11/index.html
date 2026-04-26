@@ -50,7 +50,8 @@
                 <!-- Brand -->
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-[#e50000]">
-                        <img src="YOUR_ZUBOO_LOGO_LINK_HERE.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                        <img src="zubooo.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                        
                     </div>
                     <div class="flex flex-col">
                         <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Admin Portal</span>
@@ -95,7 +96,7 @@
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
                         <div class="bg-emerald-100 p-2 rounded-lg mr-3"><i data-lucide="truck" class="w-5 h-5 text-emerald-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                            Total Imports
+                            Total Imports Inventory
                             <span id="totalImportsCount" class="ml-3 bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
@@ -352,7 +353,6 @@
     <div id="reportModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="reportModalContent">
             
-            <!-- CAPTURE AREA FOR REPORT -->
             <div id="reportCard" class="bg-white w-full">
                 <div class="bg-gray-800 p-8 text-center border-b-4 border-blue-600">
                     <h3 class="text-2xl font-bold text-white mb-1">Vehicle Status Report</h3>
@@ -367,16 +367,11 @@
                             <div><span class="text-gray-500 block mb-1">Color:</span> <span id="repColor" class="font-bold text-gray-900 text-base">-</span></div>
                             <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis" class="font-mono font-bold text-gray-900 text-base">-</span></div>
                             <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine" class="font-mono font-bold text-gray-900 text-base">-</span></div>
-                            <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-blue-600 text-lg uppercase tracking-wide">-</span></div>
                             
-                            <!-- Vehicle Number Field -->
-                            <div class="col-span-2 flex flex-col sm:flex-row items-start sm:items-center gap-2 border border-gray-200 p-3 rounded-xl bg-gray-50 mt-3">
-                                <span class="text-gray-600 font-bold whitespace-nowrap"><i data-lucide="hash" class="inline w-4 h-4 mr-1"></i>Vehicle Reg No:</span>
-                                <div class="flex w-full sm:w-auto">
-                                    <input type="text" id="repVehicleNumber" placeholder="e.g. BAA-1234" class="w-full sm:w-48 bg-white border border-gray-300 text-gray-900 text-sm rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block p-2">
-                                    <button type="button" onclick="saveVehicleNumber()" id="btnSaveVehicleNo" class="bg-blue-600 hover:bg-blue-700 text-white px-4 text-sm font-semibold rounded-r-lg transition-colors whitespace-nowrap">Save</button>
-                                </div>
-                            </div>
+                            <!-- Vehicle Number Field - READ ONLY -->
+                            <div><span class="text-gray-500 block mb-1">Vehicle Reg No:</span> <span id="repVehicleNumberDisplay" class="font-bold text-red-600 text-base">Not Registered</span></div>
+                            
+                            <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-blue-600 text-lg uppercase tracking-wide">-</span></div>
                         </div>
                     </div>
                     
@@ -394,7 +389,6 @@
                 </div>
             </div>
 
-            <!-- ACTIONS -->
             <div class="p-6 bg-gray-50 flex gap-3 border-t border-gray-200">
                 <button onclick="downloadReportPDF()" id="btnDownloadPdf" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
                     <i data-lucide="download" class="w-5 h-5 mr-2"></i> Download as PDF
@@ -403,7 +397,6 @@
                     Close
                 </button>
             </div>
-            
         </div>
     </div>
 
@@ -419,20 +412,16 @@
                 </button>
             </div>
             
-            <!-- Tabs -->
             <div class="flex border-b border-gray-200">
                 <button onclick="switchBulkTab('sales')" id="tab-dl-sales" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50">Sales Report</button>
                 <button onclick="switchBulkTab('stock')" id="tab-dl-stock" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Detailed Stock</button>
             </div>
 
             <div class="p-6">
-                <!-- Sales Tab Content -->
                 <div id="dl-sales-content" class="space-y-4 block">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Select Branch</label>
-                        <select id="dlSalesBranch" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3">
-                            <option value="all">All Branches</option>
-                        </select>
+                        <select id="dlSalesBranch" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block p-3"></select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -449,18 +438,14 @@
                     </button>
                 </div>
 
-                <!-- Stock Tab Content -->
                 <div id="dl-stock-content" class="space-y-4 hidden">
                     <div class="bg-green-50 text-green-800 text-xs p-3 rounded-lg flex items-start border border-green-100 mb-2">
                         <i data-lucide="info" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5"></i>
-                        <p>Downloads a detailed CSV report containing the Chassis and Engine numbers for all available stock.</p>
+                        <p>Detailed CSV containing Chassis and Engine numbers for stock.</p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Select Location</label>
-                        <select id="dlStockBranch" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3">
-                            <option value="all">All Locations</option>
-                            <option value="Main_Stock">Main Stock (Warehouse)</option>
-                        </select>
+                        <select id="dlStockBranch" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-green-500 focus:border-green-500 block p-3"></select>
                     </div>
                     <button onclick="generateStockCSV()" class="w-full mt-4 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
                         <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Detailed Stock
@@ -516,6 +501,38 @@
         let globalTotalImports = {};
         let globalPendingOrders = {};
 
+        // Zuboo Model Mapping (Used to ensure zero stock items show and handle normalization)
+        const ZUBOO_MODELS_COLORS = {
+           "Paris": ["white"],
+            "KB 1": ["White"],
+            "Tiger": ["Black/Grey/Golden"],
+            "EX 008": ["Green"],
+            "Tank": ["Blue","Black"],
+            "GT": ["Black/Green", "Black/Orange","Gray","White/Black","Silver"],
+            "AE4": ["Gray", "Orange", "White"],
+            "T3": ["White","Blue"],
+            "T11": ["Gray/Green","White/Orange","Gray","White","Blue","Silver"],
+            "T16": ["Gray","White","Blue","Silver","Green"]
+        };
+
+        /**
+         * Standardizes model names by removing spaces and case sensitivity.
+         * If "EX008" or "ex 008" is passed, it returns the standard "EX 008".
+         */
+        function getStandardModelName(rawName) {
+            if (!rawName) return "Unknown";
+            const normalizedRaw = String(rawName).replace(/\s+/g, '').toUpperCase();
+            
+            // Check against our master model list
+            const knownModels = Object.keys(ZUBOO_MODELS_COLORS);
+            for (const model of knownModels) {
+                if (model.replace(/\s+/g, '').toUpperCase() === normalizedRaw) {
+                    return model;
+                }
+            }
+            return rawName; // Fallback to raw if not found in master list
+        }
+
         lucide.createIcons();
 
         window.onload = () => {
@@ -527,7 +544,6 @@
             const now = new Date();
             const currentYear = now.getFullYear();
             const currentMonthStr = String(now.getMonth() + 1).padStart(2, '0');
-
             ['Branch', 'Broker'].forEach(src => {
                 const yearEl = document.getElementById(`salesFilterYear${src}`);
                 const monthEl = document.getElementById(`salesFilterMonthOnly${src}`);
@@ -540,14 +556,11 @@
             if (!WEB_APP_URL) return;
             const refreshIcon = document.getElementById('refreshIcon');
             refreshIcon.classList.add('animate-spin');
-
             try {
                 const separator = WEB_APP_URL.includes('?') ? '&' : '?';
                 const noCacheUrl = WEB_APP_URL + separator + 't=' + new Date().getTime();
-
                 const response = await fetch(noCacheUrl);
                 const data = await response.json();
-
                 if(data.status === 'success') {
                     globalShowroomStocks = data.showroomStocks || {};
                     globalMainStockColors = data.mainStockColors || {}; 
@@ -555,7 +568,6 @@
                     globalTotalImports = data.totalImports || {}; 
                     globalDetailedStock = data.detailedStock || [];
                     globalPendingOrders = data.pendingOrders || {};
-                    
                     renderTotalImports();
                     renderTotalStockTable(data.stock); 
                     renderStock(data.stock);
@@ -576,19 +588,24 @@
             const countSpan = document.getElementById('totalImportsCount');
             tbody.innerHTML = '';
             let grandTotal = 0;
-            const models = Object.keys(globalTotalImports || {}).sort();
 
+            // Group imports by standardized name
+            const groupedImports = {};
+            Object.keys(globalTotalImports || {}).forEach(raw => {
+                const std = getStandardModelName(raw);
+                groupedImports[std] = (groupedImports[std] || 0) + (parseInt(globalTotalImports[raw]) || 0);
+            });
+
+            const models = Object.keys(groupedImports).sort();
             if (models.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No data.</td></tr>';
                 return;
             }
 
             models.forEach(model => {
-                const qty = parseInt(globalTotalImports[model]) || 0;
+                const qty = groupedImports[model];
                 grandTotal += qty;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td>`;
-                tbody.appendChild(tr);
+                tbody.innerHTML += `<tr><td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td></tr>`;
             });
             countSpan.innerText = grandTotal;
         }
@@ -597,32 +614,32 @@
             const tbody = document.getElementById('totalStockTableBody');
             const countSpan = document.getElementById('totalInventoryCount');
             tbody.innerHTML = '';
+            
+            // Initialize with all known models at 0 to ENSURE zero-stock items show in this table
             let totalStockMap = {};
+            Object.keys(ZUBOO_MODELS_COLORS).forEach(m => totalStockMap[m] = 0);
+            
             let grandTotal = 0;
-
             if (mainStockArray) {
-                mainStockArray.forEach(row => {
-                    totalStockMap[row[0]] = (totalStockMap[row[0]] || 0) + parseInt(row[1] || 0);
+                mainStockArray.forEach(row => { 
+                    const std = getStandardModelName(row[0]);
+                    totalStockMap[std] = (totalStockMap[std] || 0) + parseInt(row[1] || 0); 
                 });
             }
-
             Object.keys(globalShowroomStocks).forEach(branch => {
                 const branchData = globalShowroomStocks[branch];
                 Object.keys(branchData).forEach(model => {
+                    const std = getStandardModelName(model);
                     const qty = (typeof branchData[model] === 'number') ? branchData[model] : (branchData[model].total || 0);
-                    totalStockMap[model] = (totalStockMap[model] || 0) + parseInt(qty);
+                    totalStockMap[std] = (totalStockMap[std] || 0) + parseInt(qty);
                 });
             });
 
             const models = Object.keys(totalStockMap).sort();
             models.forEach(model => {
-                const qty = totalStockMap[model];
-                grandTotal += qty;
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-gray-50";
-                tr.onclick = () => showTotalBreakdownModal(model);
-                tr.innerHTML = `<td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td>`;
-                tbody.appendChild(tr);
+                const qty = totalStockMap[model]; grandTotal += qty;
+                const badgeColor = qty === 0 ? "bg-red-100 text-red-800" : "bg-blue-100 text-blue-800";
+                tbody.innerHTML += `<tr class="cursor-pointer hover:bg-gray-50" onclick="showTotalBreakdownModal('${model}')"><td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="${badgeColor} px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td></tr>`;
             });
             countSpan.innerText = grandTotal;
         }
@@ -631,18 +648,24 @@
             const tbody = document.getElementById('stockTableBody');
             const countSpan = document.getElementById('mainWarehouseCount');
             tbody.innerHTML = '';
-            let grandTotal = 0;
-
+            
+            // For warehouse, only show items that have > 0 qty
+            let warehouseMap = {};
             if(stockArray) {
-                stockArray.forEach(row => {
-                    grandTotal += parseInt(row[1]);
-                    const tr = document.createElement('tr');
-                    tr.className = "cursor-pointer hover:bg-gray-50";
-                    tr.onclick = () => showColorModal(row[0] + " (Main Stock)", globalMainStockColors[row[0]] || {});
-                    tr.innerHTML = `<td class="py-3 font-medium text-gray-800">${row[0]}</td><td class="py-3 text-right"><span class="bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full text-xs font-bold">${row[1]}</span></td>`;
-                    tbody.appendChild(tr);
+                stockArray.forEach(row => { 
+                    const std = getStandardModelName(row[0]);
+                    warehouseMap[std] = (warehouseMap[std] || 0) + parseInt(row[1]); 
                 });
             }
+            
+            let grandTotal = 0;
+            Object.keys(warehouseMap).sort().forEach(model => {
+                const qty = warehouseMap[model];
+                if (qty === 0) return; // HIDE if zero in this table
+                grandTotal += qty;
+                const badgeColor = "bg-indigo-100 text-indigo-800";
+                tbody.innerHTML += `<tr class="cursor-pointer hover:bg-gray-50" onclick="showTotalBreakdownModal('${model}')"><td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="${badgeColor} px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td></tr>`;
+            });
             countSpan.innerText = grandTotal;
         }
 
@@ -651,14 +674,19 @@
             const countSpan = document.getElementById('pendingOrdersCount');
             tbody.innerHTML = '';
             let grandTotal = 0;
-            const models = Object.keys(globalPendingOrders || {});
+            
+            const groupedPending = {};
+            Object.keys(globalPendingOrders || {}).forEach(raw => {
+                const std = getStandardModelName(raw);
+                groupedPending[std] = (groupedPending[std] || 0) + (parseInt(globalPendingOrders[raw]) || 0);
+            });
 
+            const models = Object.keys(groupedPending).sort();
             models.forEach(model => {
-                const qty = parseInt(globalPendingOrders[model]);
+                const qty = groupedPending[model]; 
+                if (qty === 0) return;
                 grandTotal += qty;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td>`;
-                tbody.appendChild(tr);
+                tbody.innerHTML += `<tr><td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td></tr>`;
             });
             countSpan.innerText = grandTotal;
         }
@@ -668,11 +696,9 @@
             const exportSelect = document.getElementById('dlSalesBranch');
             const stockExportSelect = document.getElementById('dlStockBranch');
             const branches = Object.keys(globalShowroomStocks);
-            
             selector.innerHTML = '<option value="">Select branch...</option>';
             exportSelect.innerHTML = '<option value="all">All Branches</option>';
             stockExportSelect.innerHTML = '<option value="all">All Locations</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
-
             branches.forEach(branch => {
                 const displayName = branch.replace(/_/g, ' ');
                 selector.innerHTML += `<option value="${branch}">${displayName}</option>`;
@@ -686,26 +712,40 @@
             const tbody = document.getElementById('branchStockTableBody');
             const countSpan = document.getElementById('showroomInventoryCount');
             const selectedBranch = selector.value;
-            
             tbody.innerHTML = '';
             if (!selectedBranch) {
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">Select branch above.</td></tr>';
                 return;
             }
-
+            
             const branchData = globalShowroomStocks[selectedBranch] || {};
-            let grandTotal = 0;
+            let localMap = {};
+            
+            Object.keys(branchData).forEach(m => {
+                const std = getStandardModelName(m);
+                const info = branchData[m];
+                localMap[std] = (localMap[std] || 0) + ((typeof info === 'number') ? info : (info.total || 0));
+            });
 
-            Object.keys(branchData).forEach(model => {
-                const modelInfo = branchData[model];
-                const qty = (typeof modelInfo === 'number') ? modelInfo : (modelInfo.total || 0);
-                const colorData = (typeof modelInfo === 'number') ? { "Unspecified": qty } : (modelInfo.colors || {});
+            let grandTotal = 0;
+            Object.keys(localMap).sort().forEach(model => {
+                const qty = localMap[model];
+                if (qty === 0) return; // HIDE if zero in this table
                 grandTotal += qty;
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-gray-50";
-                tr.onclick = () => showColorModal(model + " (" + selectedBranch.replace(/_/g, ' ') + ")", colorData);
-                tr.innerHTML = `<td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="bg-teal-100 text-teal-800 px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td>`;
-                tbody.appendChild(tr);
+                const badgeColor = "bg-teal-100 text-teal-800";
+                
+                let colorData = {};
+                Object.keys(branchData).forEach(raw => {
+                    if (getStandardModelName(raw) === model) {
+                        const info = branchData[raw];
+                        const colors = (typeof info === 'number' ? { "Unspecified": info } : (info.colors || {}));
+                        Object.keys(colors).forEach(c => {
+                            colorData[c] = (colorData[c] || 0) + colors[c];
+                        });
+                    }
+                });
+
+                tbody.innerHTML += `<tr class="cursor-pointer hover:bg-gray-50" onclick='showColorModal("${model} (${selectedBranch.replace(/_/g, " ")})", ${JSON.stringify(colorData)})'><td class="py-3 font-medium text-gray-800">${model}</td><td class="py-3 text-right"><span class="${badgeColor} px-2 py-1 rounded-full text-xs font-bold">${qty}</span></td></tr>`;
             });
             countSpan.innerText = grandTotal;
         }
@@ -733,20 +773,17 @@
             const tbody = document.getElementById('salesTableBody');
             const brokerTbody = document.getElementById('brokerSalesTableBody');
             tbody.innerHTML = ''; brokerTbody.innerHTML = '';
-            
             const branchCounts = {}; const brokerCounts = {};
             salesArray.forEach(row => {
                 branchCounts[row[1]] = (branchCounts[row[1]] || 0) + 1;
                 if(row[3]) brokerCounts[row[3]] = (brokerCounts[row[3]] || 0) + 1;
             });
-
             Object.keys(branchCounts).forEach(b => {
                 tbody.innerHTML += `<tr><td class="py-3">${b.replace(/_/g, ' ')}</td><td class="py-3 text-right font-bold">${branchCounts[b]}</td></tr>`;
             });
             Object.keys(brokerCounts).forEach(br => {
                 brokerTbody.innerHTML += `<tr><td class="py-3">${br}</td><td class="py-3 text-right font-bold">${brokerCounts[br]}</td></tr>`;
             });
-
             document.getElementById('salesBranchCount').innerText = salesArray.length;
             document.getElementById('salesBrokerCount').innerText = Object.keys(brokerCounts).length;
             lucide.createIcons();
@@ -754,8 +791,7 @@
 
         function showColorModal(modelName, colorDataObj) {
             document.getElementById('colorModalModelName').textContent = modelName;
-            const list = document.getElementById('colorModalList');
-            list.innerHTML = '';
+            const list = document.getElementById('colorModalList'); list.innerHTML = '';
             Object.keys(colorDataObj).forEach(color => {
                 list.innerHTML += `<div class="flex justify-between items-center py-2 border-b border-gray-100 last:border-0"><span class="text-gray-700">${color}</span><span class="font-bold bg-gray-100 px-2 py-0.5 rounded-full text-xs">${colorDataObj[color]}</span></div>`;
             });
@@ -770,32 +806,44 @@
 
         function showTotalBreakdownModal(modelName) {
             document.getElementById('totalStockModalModelName').textContent = modelName;
-            const list = document.getElementById('totalStockModalList');
-            list.innerHTML = '';
+            const list = document.getElementById('totalStockModalList'); list.innerHTML = '';
             
-            // Main Warehouse
-            const mainColors = globalMainStockColors[modelName] || {};
-            if (Object.keys(mainColors).length > 0) {
+            // Standard name aggregation for Main Warehouse
+            const combinedMainColors = {};
+            Object.keys(globalMainStockColors || {}).forEach(raw => {
+                if (getStandardModelName(raw) === modelName) {
+                    const colors = globalMainStockColors[raw] || {};
+                    Object.keys(colors).forEach(c => {
+                        combinedMainColors[c] = (combinedMainColors[c] || 0) + colors[c];
+                    });
+                }
+            });
+
+            if (Object.keys(combinedMainColors).length > 0) {
                 let html = `<div class="bg-indigo-50 p-3 rounded-xl mb-2"><h5 class="text-xs font-bold text-indigo-700 uppercase mb-2">Main Warehouse</h5>`;
-                Object.keys(mainColors).forEach(c => {
-                    html += `<div class="flex justify-between text-sm py-1"><span>${c}</span><span class="font-bold">${mainColors[c]}</span></div>`;
-                });
-                html += `</div>`;
-                list.innerHTML += html;
+                Object.keys(combinedMainColors).forEach(c => { html += `<div class="flex justify-between text-sm py-1"><span>${c}</span><span class="font-bold">${combinedMainColors[c]}</span></div>`; });
+                list.innerHTML += html + `</div>`;
             }
 
-            // Showrooms
+            // Standard name aggregation for Showrooms
             Object.keys(globalShowroomStocks).forEach(branch => {
                 const branchData = globalShowroomStocks[branch];
-                if (branchData[modelName]) {
-                    const info = branchData[modelName];
-                    const colors = (typeof info === 'number') ? { "Unspecified": info } : (info.colors || {});
+                const combinedBranchColors = {};
+                
+                Object.keys(branchData).forEach(raw => {
+                    if (getStandardModelName(raw) === modelName) {
+                        const info = branchData[raw];
+                        const colors = (typeof info === 'number') ? { "Unspecified": info } : (info.colors || {});
+                        Object.keys(colors).forEach(c => {
+                            combinedBranchColors[c] = (combinedBranchColors[c] || 0) + colors[c];
+                        });
+                    }
+                });
+
+                if (Object.keys(combinedBranchColors).length > 0) {
                     let html = `<div class="bg-teal-50 p-3 rounded-xl mb-2"><h5 class="text-xs font-bold text-teal-700 uppercase mb-2">${branch.replace(/_/g, ' ')}</h5>`;
-                    Object.keys(colors).forEach(c => {
-                        html += `<div class="flex justify-between text-sm py-1"><span>${c}</span><span class="font-bold">${colors[c]}</span></div>`;
-                    });
-                    html += `</div>`;
-                    list.innerHTML += html;
+                    Object.keys(combinedBranchColors).forEach(c => { html += `<div class="flex justify-between text-sm py-1"><span>${c}</span><span class="font-bold">${combinedBranchColors[c]}</span></div>`; });
+                    list.innerHTML += html + `</div>`;
                 }
             });
 
@@ -813,78 +861,44 @@
             if(!query) return;
             const btn = document.getElementById('btnGenerateReport');
             btn.disabled = true; btn.innerText = 'Searching...';
-
             try {
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST', body: JSON.stringify({ action: 'getVehicleReport', query: query }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await response.json();
-                if(result.status === 'success') {
-                    populateReportModal(result.data);
-                } else { showNotification(result.message, 'error'); }
+                if(result.status === 'success') { populateReportModal(result.data); } else { showNotification(result.message, 'error'); }
             } finally { btn.disabled = false; btn.innerText = 'Get Report'; }
         }
 
         function populateReportModal(data) {
-            document.getElementById('repModel').textContent = data.model || 'N/A';
+            document.getElementById('repModel').textContent = getStandardModelName(data.model) || 'N/A';
             document.getElementById('repColor').textContent = data.color || 'N/A';
             document.getElementById('repChassis').textContent = data.chassis || 'N/A';
             document.getElementById('repEngine').textContent = data.engine || 'N/A';
             document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
-            
-            document.getElementById('repVehicleNumber').value = data.vehicleNumber || data.vehicleNo || '';
-            
+            document.getElementById('repVehicleNumberDisplay').textContent = data.vehicleNumber || data.vehicleNo || 'Not Registered';
             const custSection = document.getElementById('repCustomerSection');
             if (data.isSold) {
                 custSection.classList.remove('hidden');
                 document.getElementById('repCustomer').textContent = data.customerName || 'N/A';
                 document.getElementById('repNIC').textContent = data.nic || 'N/A';
                 document.getElementById('repInvoice').textContent = data.invoiceNo || 'N/A';
-                const d = new Date(data.saleDate);
-                document.getElementById('repDate').textContent = isNaN(d) ? data.saleDate : d.toLocaleDateString();
+                const d = new Date(data.saleDate); document.getElementById('repDate').textContent = isNaN(d) ? data.saleDate : d.toLocaleDateString();
                 document.getElementById('repBranch').textContent = data.branch ? data.branch.replace(/_/g, ' ') : 'N/A';
                 document.getElementById('repBroker').textContent = data.brokerName || 'None';
-            } else {
-                custSection.classList.add('hidden');
-            }
-
+            } else { custSection.classList.add('hidden'); }
             document.getElementById('reportModal').classList.remove('hidden');
             setTimeout(() => document.getElementById('reportModalContent').classList.add('scale-100', 'opacity-100'), 10);
             lucide.createIcons();
         }
 
-        async function saveVehicleNumber() {
-            const chassis = document.getElementById('repChassis').textContent;
-            const vehicleNo = document.getElementById('repVehicleNumber').value.trim();
-            if(!chassis || chassis === '-') return;
-
-            const btn = document.getElementById('btnSaveVehicleNo');
-            btn.disabled = true; btn.innerText = '...';
-
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST', body: JSON.stringify({ action: 'updateVehicleNumber', chassis: chassis, vehicleNumber: vehicleNo }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await response.json();
-                if(result.status === 'success') { showNotification("Updated successfully!"); }
-            } finally { btn.disabled = false; btn.innerText = 'Save'; }
-        }
-
         function closeReportModal() { document.getElementById('reportModal').classList.add('hidden'); }
-        
-        function openBulkReportModal() { 
-            document.getElementById('bulkReportModal').classList.remove('hidden'); 
-            setTimeout(() => document.getElementById('bulkReportModalContent').classList.add('scale-100', 'opacity-100'), 10); 
-            switchBulkTab('sales');
-        }
+        function openBulkReportModal() { document.getElementById('bulkReportModal').classList.remove('hidden'); setTimeout(() => document.getElementById('bulkReportModalContent').classList.add('scale-100', 'opacity-100'), 10); switchBulkTab('sales'); }
         function closeBulkReportModal() { document.getElementById('bulkReportModal').classList.add('hidden'); }
         function switchBulkTab(t) {
             document.getElementById('dl-sales-content').classList.toggle('hidden', t !== 'sales');
             document.getElementById('dl-stock-content').classList.toggle('hidden', t !== 'stock');
-            document.getElementById('tab-dl-sales').className = t === 'sales' ? 'flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50';
-            document.getElementById('tab-dl-stock').className = t === 'stock' ? 'flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50';
         }
 
         function showNotification(m, t = 'success') {
@@ -910,17 +924,14 @@
         function generateSalesCSV() {
             const branch = document.getElementById('dlSalesBranch').value;
             let csv = "Date,Showroom,Customer,Broker,Invoice,NIC,Model,Color,Engine,Chassis\n";
-            const filtered = globalSalesData.filter(r => branch === 'all' || r[1] === branch);
-            filtered.forEach(r => csv += r.map(c => `"${c}"`).join(',') + '\n');
+            globalSalesData.filter(r => branch === 'all' || r[1] === branch).forEach(r => csv += r.map(c => `"${c}"`).join(',') + '\n');
             downloadCSV(`Sales_${branch}.csv`, csv);
         }
 
         function generateStockCSV() {
             const branch = document.getElementById('dlStockBranch').value;
             let csv = "Location,Model,Color,Chassis,Engine,DateReceived\n";
-            globalDetailedStock.forEach(r => {
-                if (branch === 'all' || r[0] === branch) csv += r.map(c => `"${c}"`).join(',') + '\n';
-            });
+            globalDetailedStock.forEach(r => { if (branch === 'all' || r[0] === branch) csv += r.map(c => `"${c}"`).join(',') + '\n'; });
             downloadCSV(`Stock_${branch}.csv`, csv);
         }
 
