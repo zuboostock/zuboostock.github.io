@@ -50,7 +50,7 @@
                 <!-- Brand -->
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-[#e50000]">
-                        <img src="YOUR_ZUBOO_LOGO_LINK_HERE.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                        <img src="zubooo.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
                     </div>
                     <div class="flex flex-col">
                         <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Admin Portal</span>
@@ -111,7 +111,7 @@
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
                         <div class="bg-emerald-100 p-2 rounded-lg mr-3"><i data-lucide="truck" class="w-5 h-5 text-emerald-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                            Total Imports
+                            Total Imports Inventory
                             <span id="totalImportsCount" class="ml-3 bg-emerald-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
@@ -1038,6 +1038,12 @@
     </div>
 
     <script>
+
+        // Helper to treat "EX 008", "ex 008", and "EX008" as the same
+    function normalizeModelName(name) {
+    if (!name) return "";
+    return name.toString().toUpperCase().replace(/\s+/g, '');
+    };
         const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyXalrNVH9ax6FtEAk6IwcTgIvecKZ7tj6f2rg1CLWhbPuXht2PT555NlbsJ7f_CXuJUA/exec"; 
         
         let globalShowroomStocks = {}; 
@@ -2549,117 +2555,119 @@
         // --- RENDER FUNCTIONS FOR TABLES ---
 
         function renderTotalStock(mainStockArray) {
-            const tbody = document.getElementById('totalStockTableBody');
-            const countSpan = document.getElementById('totalInventoryCount');
-            tbody.innerHTML = '';
-            
-            let totalStockMap = {};
-            let totalPartsMap = {};
-            let totalPartsCount = 0;
-            let grandTotal = 0;
+    const tbody = document.getElementById('totalStockTableBody');
+    const countSpan = document.getElementById('totalInventoryCount');
+    tbody.innerHTML = '';
+    
+    let totalStockMap = {};
+    let displayNames = {}; // To keep track of the preferred "pretty" name
+    let totalPartsMap = {};
+    let totalPartsCount = 0;
+    let grandTotal = 0;
 
-            // 1. Calculate Parts Stock First (Check if nested structure exists)
-            const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
-            
-            if (isNested) {
-                Object.keys(globalPartsStock).forEach(loc => {
-                    Object.keys(globalPartsStock[loc]).forEach(part => {
-                        totalPartsCount += parseInt(globalPartsStock[loc][part] || 0);
-                        totalPartsMap[part] = (totalPartsMap[part] || 0) + parseInt(globalPartsStock[loc][part] || 0);
-                    });
-                });
-            } else {
-                 Object.keys(globalPartsStock).forEach(part => {
-                    totalPartsCount += parseInt(globalPartsStock[part] || 0);
-                    totalPartsMap[part] = parseInt(globalPartsStock[part] || 0);
-                 });
-            }
+    // Initialize all known models from your ZUBOO_MODELS_COLORS list with 0
+    Object.keys(ZUBOO_MODELS_COLORS).forEach(m => {
+        const norm = normalizeModelName(m);
+        totalStockMap[norm] = 0;
+        displayNames[norm] = m; 
+    });
 
-            // 2. Add Main Warehouse Stock
-            if (mainStockArray && mainStockArray.length > 0) {
-                mainStockArray.forEach(row => {
-                    if (row[0]) {
-                        totalStockMap[row[0]] = (totalStockMap[row[0]] || 0) + parseInt(row[1] || 0);
-                    }
-                });
-            }
-
-            // 3. Add Showroom Stock
-            if (globalShowroomStocks) {
-                Object.keys(globalShowroomStocks).forEach(branch => {
-                    const branchData = globalShowroomStocks[branch];
-                    Object.keys(branchData).forEach(model => {
-                        let qty = 0;
-                        if (typeof branchData[model] === 'number') {
-                            qty = branchData[model];
-                        } else {
-                            qty = branchData[model].total || 0;
-                        }
-                        totalStockMap[model] = (totalStockMap[model] || 0) + parseInt(qty);
-                    });
-                });
-            }
-
-            const models = Object.keys(totalStockMap).sort();
-            if(models.length === 0 && totalPartsCount === 0) {
-                if(countSpan) countSpan.innerText = '0';
-                tbody.innerHTML = '<tr><td colspan="2" class="py-6 text-center text-gray-400">No inventory found</td></tr>';
-                return;
-            }
-
-            models.forEach(model => {
-                const qty = totalStockMap[model];
-                grandTotal += qty;
-
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
-                
-                tr.onclick = () => {
-                    showTotalBreakdownModal(model);
-                };
-                
-                const tdModel = document.createElement('td');
-                tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
-                tdModel.innerHTML = `${model} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
-                
-                const tdQty = document.createElement('td');
-                tdQty.className = "py-3 text-right";
-                
-                let badgeClass = "bg-blue-100 text-blue-800 ring-blue-600/20";
-                if (qty <= 5) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
-                else if (qty <= 15) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
-
-                tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
-                
-                tr.appendChild(tdModel);
-                tr.appendChild(tdQty);
-                tbody.appendChild(tr);
+    // 1. Calculate Parts Stock
+    const isNested = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
+    if (isNested) {
+        Object.keys(globalPartsStock).forEach(loc => {
+            Object.keys(globalPartsStock[loc]).forEach(part => {
+                totalPartsCount += parseInt(globalPartsStock[loc][part] || 0);
+                totalPartsMap[part] = (totalPartsMap[part] || 0) + parseInt(globalPartsStock[loc][part] || 0);
             });
-            
-            // 4. Render Parts Dedicated Row (Highlighted)
-            if (totalPartsCount > 0) {
-                grandTotal += totalPartsCount;
-                const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
-                
-                tr.onclick = () => showPartsModal("Total Inventory", totalPartsMap);
-                
-                const tdModel = document.createElement('td');
-                tdModel.className = "py-4 font-bold text-orange-800 flex items-center";
-                tdModel.innerHTML = `<i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>`;
-                
-                const tdQty = document.createElement('td');
-                tdQty.className = "py-4 text-right";
-                tdQty.innerHTML = `<span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>`;
-                
-                tr.appendChild(tdModel);
-                tr.appendChild(tdQty);
-                tbody.appendChild(tr);
-            }
+        });
+    } else {
+        Object.keys(globalPartsStock).forEach(part => {
+            totalPartsCount += parseInt(globalPartsStock[part] || 0);
+            totalPartsMap[part] = parseInt(globalPartsStock[part] || 0);
+        });
+    }
 
-            if(countSpan) countSpan.innerText = grandTotal;
-            lucide.createIcons();
-        }
+    // 2. Process Main Warehouse Stock
+    if (mainStockArray && mainStockArray.length > 0) {
+        mainStockArray.forEach(row => {
+            if (row[0]) {
+                const norm = normalizeModelName(row[0]);
+                totalStockMap[norm] = (totalStockMap[norm] || 0) + parseInt(row[1] || 0);
+                if (!displayNames[norm]) displayNames[norm] = row[0];
+            }
+        });
+    }
+
+    // 3. Process Showroom Stock
+    if (globalShowroomStocks) {
+        Object.keys(globalShowroomStocks).forEach(branch => {
+            const branchData = globalShowroomStocks[branch];
+            Object.keys(branchData).forEach(model => {
+                let qty = 0;
+                if (typeof branchData[model] === 'number') {
+                    qty = branchData[model];
+                } else {
+                    qty = branchData[model].total || 0;
+                }
+                const norm = normalizeModelName(model);
+                totalStockMap[norm] = (totalStockMap[norm] || 0) + parseInt(qty);
+                if (!displayNames[norm]) displayNames[norm] = model;
+            });
+        });
+    }
+
+    // Render Rows (Including those with 0 stock)
+    const sortedNormNames = Object.keys(totalStockMap).sort();
+    
+    sortedNormNames.forEach(norm => {
+        const qty = totalStockMap[norm];
+        const originalName = displayNames[norm];
+        grandTotal += qty;
+
+        const tr = document.createElement('tr');
+        tr.className = "cursor-pointer hover:bg-gray-50 transition-colors";
+        tr.onclick = () => showTotalBreakdownModal(originalName);
+
+        const tdModel = document.createElement('td');
+        tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
+        tdModel.innerHTML = `${originalName} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
+        
+        const tdQty = document.createElement('td');
+        tdQty.className = "py-3 text-right";
+        
+        let badgeClass = "bg-blue-100 text-blue-800 ring-blue-600/20";
+        if (qty === 0) badgeClass = "bg-gray-100 text-gray-400 ring-gray-300"; // Distinct look for zero
+        else if (qty <= 5) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
+        else if (qty <= 15) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
+
+        tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
+        
+        tr.appendChild(tdModel);
+        tr.appendChild(tdQty);
+        tbody.appendChild(tr);
+    });
+    
+    // Render Parts Row
+    if (totalPartsCount > 0) {
+        grandTotal += totalPartsCount;
+        const tr = document.createElement('tr');
+        tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
+        tr.onclick = () => showPartsModal("Total Inventory", totalPartsMap);
+        tr.innerHTML = `
+            <td class="py-4 font-bold text-orange-800 flex items-center">
+                <i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories 
+                <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>
+            </td>
+            <td class="py-4 text-right">
+                <span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>
+            </td>`;
+        tbody.appendChild(tr);
+    }
+
+    if(countSpan) countSpan.innerText = grandTotal;
+    lucide.createIcons();
+}
 
         function renderStock(stockArray) {
             const tbody = document.getElementById('stockTableBody');
