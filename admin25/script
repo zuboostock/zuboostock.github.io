@@ -1,0 +1,349 @@
+/**
+ * ZUBOO ADMIN PORTAL - GOOGLE APPS SCRIPT BACKEND
+ */
+
+// ADD YOUR ADMIN EMAIL(S) HERE. Use commas to separate multiple emails.
+const ADMIN_EMAILS = 'admin@example.com'; 
+
+const SHEETS = {
+  MAIN_STOCK: 'Main_Stock',
+  SALES: 'Sales',
+  PARTS: 'Parts_Stock',
+  PENDING_ORDERS: 'Pending_Orders', // NEW: Added Pending Orders Sheet
+  SHOWROOMS: [
+    'ANGUNAKOLA Branch', 'AMBALANTOTA Branch', 'AR EMBELIPITIYA Branch', 
+    'AR RATHNAPURA Branch', 'AR SURIYAWAWA Branch','AR THISSA Branch',
+    'AR WADDUWA Branch','GANEMULLA Branch','LUNUGAMVEHERA Branch',
+    'MONARAGALA Branch','PADALANGALA Branch','PUTHTHALAMA Branch',
+    'THALPITIYA Branch','US ANURADAPURA Branch','US WATHTHALA Branch',
+    'WADIGALA Branch','US NAKIYADENIYA Branch'
+  ]
+};
+
+function setupDatabase() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  setupSheet(ss, SHEETS.MAIN_STOCK, ['Chassis No', 'Engine No', 'Model', 'Color', 'Date Added', 'Status']);
+  // UPDATED: Added 'Vehicle No' column for the Sales Sheet
+  setupSheet(ss, SHEETS.SALES, ['Date', 'Showroom', 'Customer Name', 'Broker Name', 'Invoice No', 'NIC', 'Model', 'Color', 'Engine No', 'Chassis No', 'Vehicle No']);
+  setupSheet(ss, SHEETS.PARTS, ['Date', 'Destination', 'Part Name', 'Quantity Added']);
+  setupSheet(ss, SHEETS.PENDING_ORDERS, ['Date', 'Model', 'Quantity']); // NEW: Setup headers for pending orders
+  SHEETS.SHOWROOMS.forEach(showroom => {
+    setupSheet(ss, showroom, ['Chassis No', 'Engine No', 'Model', 'Color', 'Date Received', 'Status']);
+  });
+}
+
+function setupSheet(ss, sheetName, headers) {
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+    sheet.appendRow(headers);
+    sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  }
+}
+
+function ensureSheetsExist() { setupDatabase(); }
+
+function doGet(e) {
+  ensureSheetsExist();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  try {
+    const mainStockSheet = ss.getSheetByName(SHEETS.MAIN_STOCK);
+    const salesSheet = ss.getSheetByName(SHEETS.SALES);
+    const partsSheet = ss.getSheetByName(SHEETS.PARTS);
+    const pendingSheet = ss.getSheetByName(SHEETS.PENDING_ORDERS); // NEW
+    
+    let stockSummary = {};      
+    let mainStockColors = {};   
+    let showroomStocks = {};    
+    let availableChassis = { "Main_Stock": [] }; 
+    let partsStock = {}; 
+    let pendingOrders = {}; // NEW: To hold aggregated pending quantities
+    let detailedStock = []; 
+    let totalImports = {}; // NEW: Holds Total Imports (Available + Sold)
+    
+    // 1. Process Main Stock
+    const mainData = mainStockSheet.getDataRange().getValues();
+    for (let i = 1; i < mainData.length; i++) {
+      const [chassis, engine, model, rawColor, date, status] = mainData[i];
+      if (status === 'Available') {
+        const color = rawColor ? String(rawColor).trim().toUpperCase() : ''; 
+        stockSummary[model] = (stockSummary[model] || 0) + 1;
+        totalImports[model] = (totalImports[model] || 0) + 1; // Add Available to Total Imports
+        if (!mainStockColors[model]) mainStockColors[model] = {};
+        mainStockColors[model][color] = (mainStockColors[model][color] || 0) + 1;
+        availableChassis["Main_Stock"].push(chassis);
+        detailedStock.push(['Main_Stock', model, color, chassis, engine, date]);
+      }
+    }
+    
+    const formattedStock = Object.keys(stockSummary).map(model => [model, stockSummary[model]]);
+    
+    // 2. Process Showroom Stocks
+    SHEETS.SHOWROOMS.forEach(showroom => {
+      showroomStocks[showroom] = {};
+      availableChassis[showroom] = [];
+      const shSheet = ss.getSheetByName(showroom);
+      if (shSheet) {
+        const shData = shSheet.getDataRange().getValues();
+        for (let i = 1; i < shData.length; i++) {
+          const [chassis, engine, model, rawColor, date, status] = shData[i];
+          if (status === 'Available') {
+            const color = rawColor ? String(rawColor).trim().toUpperCase() : ''; 
+            if (!showroomStocks[showroom][model]) {
+              showroomStocks[showroom][model] = { total: 0, colors: {} };
+            }
+            showroomStocks[showroom][model].total++;
+            showroomStocks[showroom][model].colors[color] = (showroomStocks[showroom][model].colors[color] || 0) + 1;
+            totalImports[model] = (totalImports[model] || 0) + 1; // Add Available to Total Imports
+            availableChassis[showroom].push(chassis);
+            detailedStock.push([showroom, model, color, chassis, engine, date]);
+          }
+        }
+      }
+    });
+    
+    // 3. Process Parts Stock 
+    const partsData = partsSheet.getDataRange().getValues();
+    for (let i = 1; i < partsData.length; i++) {
+      const [date, dest, partName, qty] = partsData[i];
+      if (partName && dest) {
+        if (!partsStock[dest]) partsStock[dest] = {};
+        partsStock[dest][partName] = (partsStock[dest][partName] || 0) + parseInt(qty || 0);
+      }
+    }
+
+    // 4. Process Pending Orders
+    const pendingData = pendingSheet.getDataRange().getValues();
+    for (let i = 1; i < pendingData.length; i++) {
+      const [date, model, qty] = pendingData[i];
+      if (model) {
+        pendingOrders[model] = (pendingOrders[model] || 0) + parseInt(qty || 0);
+      }
+    }
+    
+    // 5. Process Sales Data
+    let salesData = [];
+    if (salesSheet.getLastRow() > 1) {
+      salesData = salesSheet.getRange(2, 1, salesSheet.getLastRow() - 1, salesSheet.getLastColumn()).getValues();
+      for (let i = 0; i < salesData.length; i++) {
+        const model = salesData[i][6];
+        if (model) {
+          totalImports[model] = (totalImports[model] || 0) + 1; // Add Sold to Total Imports
+        }
+      }
+    }
+    
+    const response = {
+      status: 'success', stock: formattedStock, sales: salesData, showroomStocks: showroomStocks,
+      mainStockColors: mainStockColors, availableChassis: availableChassis, partsStock: partsStock,
+      detailedStock: detailedStock, pendingOrders: pendingOrders, totalImports: totalImports // NEW: Total Imports Data sent to frontend
+    };
+    return ContentService.createTextOutput(JSON.stringify(response)).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
+  ensureSheetsExist();
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  try {
+    const payload = JSON.parse(e.postData.contents);
+    const action = payload.action;
+    
+    if (payload.color) {
+        payload.color = String(payload.color).trim().toUpperCase();
+    }
+    
+    if (action === 'addStock') {
+      const destName = payload.destination || SHEETS.MAIN_STOCK;
+      const sheet = ss.getSheetByName(destName);
+      
+      const allSearchSheets = [SHEETS.MAIN_STOCK, ...SHEETS.SHOWROOMS];
+      let isDuplicate = false;
+      for (let sheetName of allSearchSheets) {
+        const s = ss.getSheetByName(sheetName);
+        if(!s) continue;
+        const existingData = s.getDataRange().getValues();
+        if(existingData.some(row => row[0].toString().toLowerCase() === payload.chassisNo.toLowerCase())) {
+           isDuplicate = true;
+           break;
+        }
+      }
+      
+      if (isDuplicate) throw new Error("Chassis number already exists in inventory.");
+      
+      sheet.appendRow([payload.chassisNo, payload.engineNo, payload.model, payload.color, payload.datetime, 'Available']);
+      return successResponse();
+    }
+    
+    else if (action === 'addPartStock') {
+      const sheet = ss.getSheetByName(SHEETS.PARTS);
+      sheet.appendRow([payload.datetime, payload.destination, payload.partName, payload.quantity]);
+      if (payload.destination !== 'Main_Stock') {
+        sheet.appendRow([payload.datetime, 'Main_Stock', payload.partName, -payload.quantity]);
+      }
+      return successResponse();
+    }
+
+    // Action for Pending Orders
+    else if (action === 'addPendingOrder') {
+      const sheet = ss.getSheetByName(SHEETS.PENDING_ORDERS);
+      sheet.appendRow([payload.datetime, payload.model, payload.quantity]);
+      return successResponse();
+    }
+    
+    else if (action === 'receiveStockByChassis') {
+      const sourceSheet = ss.getSheetByName(payload.sourceLocation || SHEETS.MAIN_STOCK);
+      const destSheet = ss.getSheetByName(payload.destination);
+      
+      const sourceData = sourceSheet.getDataRange().getValues();
+      let foundIndex = -1, vehicleData = null;
+      for (let i = 1; i < sourceData.length; i++) {
+        if (sourceData[i][0].toString().toLowerCase() === payload.chassisNo.toLowerCase() && sourceData[i][5] === 'Available') {
+          foundIndex = i + 1; vehicleData = sourceData[i]; break;
+        }
+      }
+      if (foundIndex === -1) throw new Error(`Chassis not found in ${(payload.sourceLocation || 'Main_Stock').replace(/_/g, ' ')} or it is already transferred/sold.`);
+      
+      sourceSheet.getRange(foundIndex, 6).setValue('Transferred to ' + payload.destination);
+      destSheet.appendRow([vehicleData[0], vehicleData[1], vehicleData[2], payload.color || vehicleData[3], payload.datetime, 'Available']);
+      return successResponse();
+    }
+    
+    else if (action === 'recordSale') {
+      const locationSheet = ss.getSheetByName(payload.showroom);
+      const salesSheet = ss.getSheetByName(SHEETS.SALES);
+      const locData = locationSheet.getDataRange().getValues();
+      let foundIndex = -1;
+      for (let i = 1; i < locData.length; i++) {
+        if (locData[i][0].toString().toLowerCase() === payload.chassisNo.toLowerCase() && locData[i][5] === 'Available') {
+          foundIndex = i + 1; break;
+        }
+      }
+      if (foundIndex === -1) throw new Error("Chassis not found or is no longer available in " + payload.showroom.replace('_', ' '));
+      locationSheet.getRange(foundIndex, 6).setValue('Sold');
+      
+      // Appended an empty string '' as the 11th value representing the unassigned Vehicle No upon sale
+      salesSheet.appendRow([payload.datetime, payload.showroom, payload.customerName, payload.brokerName || '', payload.invoiceNo, payload.nic, payload.model, payload.color, payload.engineNo, payload.chassisNo, '']);
+      
+      try {
+        const branchName = payload.showroom.replace(/_/g, ' ');
+        const emailSubject = `New Zuboo Sale Alert: ${branchName}`;
+        const emailBody = `
+Hello Admin,
+
+A new sale has just been completed at ${branchName}. Here are the details:
+
+VEHICLE DETAILS
+-------------------
+Model: ${payload.model}
+Color: ${payload.color}
+Chassis Number: ${payload.chassisNo}
+Engine Number: ${payload.engineNo}
+
+SALE DETAILS
+-------------------
+Date of Sale: ${payload.datetime}
+Invoice Number: ${payload.invoiceNo}
+
+CUSTOMER DETAILS
+-------------------
+Name: ${payload.customerName}
+NIC: ${payload.nic}
+Broker: ${payload.brokerName ? payload.brokerName : 'None'}
+
+--
+This is an automated message from the Zuboo Admin Portal.
+        `;
+        GmailApp.sendEmail(ADMIN_EMAILS, emailSubject, emailBody.trim(), { name: 'Zuboo Admin System', replyTo: 'atvimport@stocks.online' });
+      } catch (mailError) { console.error("Failed to send email notification: " + mailError); }
+      
+      return successResponse();
+    }
+
+    // Action for updating the Registration / Vehicle Number on an existing sale
+    else if (action === 'updateVehicleNumber') {
+      const salesSheet = ss.getSheetByName(SHEETS.SALES);
+      const salesData = salesSheet.getDataRange().getValues();
+      let foundRow = -1;
+      
+      // Iterate over sales data to find matching chassis (Chassis is at Index 9)
+      for (let i = 1; i < salesData.length; i++) {
+        if (salesData[i][9].toString().toLowerCase() === payload.chassis.toLowerCase()) {
+          foundRow = i + 1; // getRange uses 1-based indexing
+          break;
+        }
+      }
+      
+      if (foundRow === -1) {
+        throw new Error("Chassis not found in Sales records. Vehicle must be sold first.");
+      }
+      
+      // Set the Vehicle No (11th column = index 11 in getRange)
+      salesSheet.getRange(foundRow, 11).setValue(payload.vehicleNumber);
+      return successResponse();
+    }
+    
+    else if (action === 'lookupChassis') {
+      const chassis = payload.chassis.toLowerCase();
+      let foundData = null;
+      const allSearchSheets = [SHEETS.MAIN_STOCK, ...SHEETS.SHOWROOMS];
+      for (let sheetName of allSearchSheets) {
+        const sheet = ss.getSheetByName(sheetName);
+        if(!sheet) continue;
+        const data = sheet.getDataRange().getValues();
+        for (let i = 1; i < data.length; i++) {
+          if (data[i][0].toString().toLowerCase() === chassis && data[i][5] === 'Available') {
+            foundData = { chassis: data[i][0], engine: data[i][1], model: data[i][2], color: data[i][3] ? String(data[i][3]).toUpperCase() : '', location: sheetName }; 
+            break;
+          }
+        }
+        if(foundData) break;
+      }
+      if (!foundData) throw new Error("Chassis not found in inventory or is already sold.");
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: foundData })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    else if (action === 'getVehicleReport') {
+      const query = payload.query.toLowerCase();
+      let reportData = null;
+      const salesSheet = ss.getSheetByName(SHEETS.SALES);
+      const salesData = salesSheet.getDataRange().getValues();
+      for (let i = 1; i < salesData.length; i++) {
+        if (salesData[i][9].toString().toLowerCase() === query || salesData[i][4].toString().toLowerCase() === query || salesData[i][5].toString().toLowerCase() === query) {
+          // Including 'vehicleNo' parameter by grabbing salesData[i][10]
+          reportData = { 
+            isSold: true, saleDate: salesData[i][0], branch: salesData[i][1], customerName: salesData[i][2], brokerName: salesData[i][3], 
+            invoiceNo: salesData[i][4], nic: salesData[i][5], model: salesData[i][6], color: salesData[i][7] ? String(salesData[i][7]).toUpperCase() : '', 
+            engine: salesData[i][8], chassis: salesData[i][9], vehicleNo: salesData[i][10] || '', location: 'Sold - Customer' 
+          }; break;
+        }
+      }
+      if (!reportData) {
+        const allSearchSheets = [SHEETS.MAIN_STOCK, ...SHEETS.SHOWROOMS];
+        for (let sheetName of allSearchSheets) {
+          const sheet = ss.getSheetByName(sheetName);
+          if(!sheet) continue;
+          const data = sheet.getDataRange().getValues();
+          for (let i = 1; i < data.length; i++) {
+            if (data[i][0].toString().toLowerCase() === query) {
+              if (sheetName === SHEETS.MAIN_STOCK && data[i][5].toString().includes('Transferred')) continue; 
+              reportData = { isSold: false, chassis: data[i][0], engine: data[i][1], model: data[i][2], color: data[i][3] ? String(data[i][3]).toUpperCase() : '', location: sheetName }; break;
+            }
+          }
+          if(reportData) break;
+        }
+      }
+      if (!reportData) throw new Error("No record found for Chassis or Invoice: " + payload.query);
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success', data: reportData })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    throw new Error("Invalid Action provided.");
+  } catch (error) { return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() })).setMimeType(ContentService.MimeType.JSON); }
+}
+
+function successResponse() { return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON); }
