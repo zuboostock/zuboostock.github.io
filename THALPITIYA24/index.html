@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,21 +12,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        
-        .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease-in-out; }
-        .tab-content.active { display: block; opacity: 1; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        
-        @keyframes slideUp { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
         }
-        
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .tab-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
         .loader {
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 3px solid transparent;
             width: 18px;
@@ -35,42 +62,71 @@
             vertical-align: middle;
             margin-right: 8px;
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        input:focus, select:focus { box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2); outline: none; border-color: transparent; }
-        .input-group:focus-within { box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2); border-color: #0d9488; }
-        
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        input:focus,
+        select:focus {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+            outline: none;
+            border-color: transparent;
+        }
+
+        .input-group:focus-within {
+            box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.2);
+            border-color: #0d9488;
+        }
+
         /* Disabled button styling */
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
+
 <body class="text-gray-800 antialiased min-h-screen flex flex-col relative">
 
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-lg border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:justify-between md:items-center py-4 gap-4">
-                
+
                 <!-- Brand -->
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 rounded-xl overflow-hidden shadow-md flex-shrink-0 bg-[#e50000]">
-                        <img src="../admin25/zubooo.jpg" alt="Zuboo Logo" class="w-full h-full object-cover" onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
+                        <img src="../admin25/zubooo.jpg" alt="Zuboo Logo" class="w-full h-full object-cover"
+                            onerror="this.onerror=null; this.src='https://placehold.co/100x100/e50000/white?text=Zuboo';">
                     </div>
                     <div class="flex flex-col">
                         <span class="font-bold text-xl tracking-tight text-gray-900 leading-none">Zuboo Branch</span>
-                        <span id="navBranchName" class="text-xs text-teal-600 font-bold mt-0.5 uppercase tracking-wider">ATV Import Pvt Ltd</span>
+                        <span id="navBranchName"
+                            class="text-xs text-teal-600 font-bold mt-0.5 uppercase tracking-wider">ATV Import Pvt
+                            Ltd</span>
                     </div>
                 </div>
 
                 <!-- Tabs -->
-                <div class="inline-flex bg-gray-100/80 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar max-w-full ring-1 ring-gray-900/5">
-                    <button onclick="switchTab('analytics')" id="btn-analytics" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-teal-700 bg-white shadow-sm ring-1 ring-gray-200">
+                <div
+                    class="inline-flex bg-gray-100/80 p-1.5 rounded-2xl overflow-x-auto hide-scrollbar max-w-full ring-1 ring-gray-900/5">
+                    <button onclick="switchTab('analytics')" id="btn-analytics"
+                        class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-teal-700 bg-white shadow-sm ring-1 ring-gray-200">
                         <i data-lucide="layout-dashboard" class="w-4 h-4 mr-2"></i> Dashboard
                     </button>
-                    <button onclick="switchTab('salesForm')" id="btn-salesForm" style="display: none;" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                    <button onclick="switchTab('salesForm')" id="btn-salesForm" style="display: none;"
+                        class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
                         <i data-lucide="receipt" class="w-4 h-4 mr-2"></i> Record Sale
                     </button>
-                    <button onclick="switchTab('stockRequests')" id="btn-stockRequests" class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
+                    <button onclick="switchTab('stockRequests')" id="btn-stockRequests"
+                        class="tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50">
                         <i data-lucide="arrow-left-right" class="w-4 h-4 mr-2"></i> Stock Requests
                     </button>
                 </div>
@@ -84,7 +140,8 @@
         <!-- GLOBAL DATALIST FOR MODELS -->
         <datalist id="zubooModelsList"></datalist>
 
-        <div id="notification" class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
+        <div id="notification"
+            class="hidden max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300">
             <div class="flex items-center">
                 <i id="notif-icon" data-lucide="check-circle" class="w-5 h-5 mr-3"></i>
                 <span id="notif-message" class="font-medium text-sm"></span>
@@ -100,35 +157,42 @@
                 <h2 class="text-2xl font-bold text-gray-800 flex items-center">
                     <span class="branch-display-name text-teal-600 mr-2">Branch</span> Dashboard
                 </h2>
-                <button onclick="fetchAnalytics()" class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-teal-600 font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-200 flex items-center ring-1 ring-gray-900/5">
+                <button onclick="fetchAnalytics()"
+                    class="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:text-teal-600 font-semibold py-2.5 px-5 rounded-xl shadow-sm transition-all duration-200 flex items-center ring-1 ring-gray-900/5">
                     <i data-lucide="refresh-cw" class="w-4 h-4 mr-2" id="refreshIcon"></i> Sync Data
                 </button>
             </div>
 
             <!-- Tip Banner -->
-            
+
 
             <!-- Sales Widget -->
             <div class="grid grid-cols-1 mb-8">
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex flex-col justify-center transition-colors relative">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 p-6 flex flex-col justify-center transition-colors relative">
                     <div class="flex flex-col md:flex-row items-start md:items-center justify-between w-full gap-6">
-                        
+
                         <div id="salesWidgetClickable" class="flex items-center cursor-pointer group w-full md:w-auto">
                             <div class="bg-teal-100 p-4 rounded-2xl mr-5 group-hover:scale-105 transition-transform">
                                 <i data-lucide="award" class="w-8 h-8 text-teal-600"></i>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-3">
+                                <p
+                                    class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1 flex items-center gap-3">
                                     Bikes Sold
-                                    <span class="text-xs text-teal-600 font-bold underline decoration-teal-300 underline-offset-2">View Breakdown</span>
+                                    <span
+                                        class="text-xs text-teal-600 font-bold underline decoration-teal-300 underline-offset-2">View
+                                        Breakdown</span>
                                 </p>
                                 <h4 class="text-3xl font-bold text-gray-900" id="statTotalSales">-</h4>
                             </div>
                         </div>
 
                         <!-- Advanced Filter Section -->
-                        <div class="flex flex-wrap items-center gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200 w-full md:w-auto">
-                            <select id="branchSalesFilterType" onchange="handleBranchFilterTypeChange()" class="bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2 cursor-pointer shadow-sm">
+                        <div
+                            class="flex flex-wrap items-center gap-2 bg-gray-50 p-2.5 rounded-xl border border-gray-200 w-full md:w-auto">
+                            <select id="branchSalesFilterType" onchange="handleBranchFilterTypeChange()"
+                                class="bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2 cursor-pointer shadow-sm">
                                 <option value="this_month" selected>Current Month</option>
                                 <option value="today">Today</option>
                                 <option value="this_year">This Year</option>
@@ -136,9 +200,10 @@
                                 <option value="specific_month">Select Month</option>
                                 <option value="custom_range">Custom Range</option>
                             </select>
-                            
+
                             <div id="branchSalesFilterSpecificMonth" class="hidden items-center gap-1">
-                                <select id="branchSalesFilterMonthOnly" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm cursor-pointer">
+                                <select id="branchSalesFilterMonthOnly" onchange="applyBranchSalesFilter()"
+                                    class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm cursor-pointer">
                                     <option value="01">January</option>
                                     <option value="02">February</option>
                                     <option value="03">March</option>
@@ -152,13 +217,17 @@
                                     <option value="11">November</option>
                                     <option value="12">December</option>
                                 </select>
-                                <input type="number" id="branchSalesFilterYear" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm w-20 text-center" min="2000" max="2100">
+                                <input type="number" id="branchSalesFilterYear" onchange="applyBranchSalesFilter()"
+                                    class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm w-20 text-center"
+                                    min="2000" max="2100">
                             </div>
-                            
+
                             <div id="branchSalesFilterRange" class="hidden items-center gap-1">
-                                <input type="date" id="branchSalesFilterStart" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
+                                <input type="date" id="branchSalesFilterStart" onchange="applyBranchSalesFilter()"
+                                    class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
                                 <span class="text-gray-500 text-sm font-medium mx-1">-</span>
-                                <input type="date" id="branchSalesFilterEnd" onchange="applyBranchSalesFilter()" class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
+                                <input type="date" id="branchSalesFilterEnd" onchange="applyBranchSalesFilter()"
+                                    class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 shadow-sm">
                             </div>
                         </div>
                     </div>
@@ -167,14 +236,17 @@
 
             <!-- Tables: Total Stock, Branch Stock, Pending Orders -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                
+
                 <!-- Total Inventory Table -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="layers" class="w-5 h-5 text-blue-600"></i></div>
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="layers"
+                                class="w-5 h-5 text-blue-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800 flex items-center">
                             Total Inventory
-                            <span id="totalInventoryCount" class="ml-3 bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            <span id="totalInventoryCount"
+                                class="ml-3 bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
@@ -186,20 +258,25 @@
                                 </tr>
                             </thead>
                             <tbody id="totalStockTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                                <tr>
+                                    <td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Current Available Stock -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                         <div class="flex items-center">
-                            <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="boxes" class="w-5 h-5 text-teal-600"></i></div>
+                            <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="boxes"
+                                    class="w-5 h-5 text-teal-600"></i></div>
                             <h3 class="text-lg font-bold text-gray-800 flex items-center">
                                 Current Branch Stock
-                                <span id="showroomInventoryCount" class="ml-3 bg-teal-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                                <span id="showroomInventoryCount"
+                                    class="ml-3 bg-teal-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                             </h3>
                         </div>
                     </div>
@@ -212,19 +289,24 @@
                                 </tr>
                             </thead>
                             <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                                <tr>
+                                    <td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Pending Orders Table -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center">
-                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="clock" class="w-5 h-5 text-amber-600"></i></div>
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="clock"
+                                class="w-5 h-5 text-amber-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800 flex items-center">
                             Pending Bulk Orders
-                            <span id="pendingOrdersCount" class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            <span id="pendingOrdersCount"
+                                class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
@@ -236,32 +318,42 @@
                                 </tr>
                             </thead>
                             <tbody id="pendingOrdersTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td></tr>
+                                <tr>
+                                    <td colspan="2" class="py-8 text-center text-gray-400">Loading data...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-                
+
             </div>
 
             <!-- Generate Data Report Tool -->
-            <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+            <div
+                class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                 <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <div class="flex items-center">
-                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="file-search" class="w-5 h-5 text-teal-600"></i></div>
+                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="file-search"
+                                class="w-5 h-5 text-teal-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">Generate Data Report (PDF)</h3>
                     </div>
                     <!-- BULK EXPORT BUTTON -->
-                    <button onclick="openBulkReportModal()" class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
+                    <button onclick="openBulkReportModal()"
+                        class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
                         <i data-lucide="download" class="w-4 h-4 mr-2"></i> Bulk Export CSV
                     </button>
                 </div>
                 <div class="p-6 flex flex-col sm:flex-row items-end gap-4">
                     <div class="flex-1 w-full">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Search Vehicle Details<br><small class="text-xs text-gray-500"><i>Enter Chassis No, Invoice No, NIC, or Mobile No...</i></small></label>
-                        <div class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
-                            <input type="text" id="reportSearchQuery" placeholder="Enter" class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
-                            <button type="button" onclick="generateReport()" id="btnGenerateReport" class="bg-teal-600 hover:bg-teal-700 text-white px-6 font-semibold transition-colors flex items-center whitespace-nowrap">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Search Vehicle Details<br><small
+                                class="text-xs text-gray-500"><i>Enter Chassis No, Invoice No, NIC, or Mobile
+                                    No...</i></small></label>
+                        <div
+                            class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
+                            <input type="text" id="reportSearchQuery" placeholder="Enter"
+                                class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
+                            <button type="button" onclick="generateReport()" id="btnGenerateReport"
+                                class="bg-teal-600 hover:bg-teal-700 text-white px-6 font-semibold transition-colors flex items-center whitespace-nowrap">
                                 <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Get Report
                             </button>
                         </div>
@@ -273,30 +365,34 @@
         <!-- TAB 2: Record Sale Form -->
         <div id="salesForm" class="tab-content max-w-4xl mx-auto">
             <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-betwesen">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="banknote" class="w-5 h-5 text-teal-600"></i></div>
+                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="banknote"
+                                class="w-5 h-5 text-teal-600"></i></div>
                         New Sale Entry
                     </h2>
                 </div>
-                
+
                 <form id="newSaleForm" class="p-8 space-y-8">
                     <!-- Header Section -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Branch Location</label>
-                            <input type="text" id="displayBranchSale" disabled class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
+                            <input type="text" id="displayBranchSale" disabled
+                                class="w-full bg-gray-100 border border-gray-200 text-gray-500 font-medium text-sm rounded-xl block p-3.5 cursor-not-allowed">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-                            <input type="date" id="datetime" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                            <input type="date" id="datetime" required
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
                     <!-- Broker Checkbox Section -->
                     <div class="pt-4 border-t border-gray-100">
                         <label class="flex items-center space-x-3 cursor-pointer">
-                            <input type="checkbox" id="hasBroker" onchange="toggleBrokerField()" class="w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 transition-colors">
+                            <input type="checkbox" id="hasBroker" onchange="toggleBrokerField()"
+                                class="w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500 transition-colors">
                             <span class="text-sm font-semibold text-gray-700">Sale handled by a Broker</span>
                         </label>
                     </div>
@@ -304,7 +400,8 @@
                     <div id="brokerNameContainer" class="hidden grid-cols-1 gap-8 pt-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Broker Name</label>
-                            <input type="text" id="brokerName" placeholder="Enter broker name" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                            <input type="text" id="brokerName" placeholder="Enter broker name"
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
@@ -312,18 +409,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-gray-100">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Customer Name</label>
-                            <input type="text" id="customerName" placeholder="e.g. John Doe" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                            <input type="text" id="customerName" placeholder="e.g. John Doe" required
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">NIC Number</label>
-                            <input type="text" id="nic" placeholder="e.g. 901234567V" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                            <input type="text" id="nic" placeholder="e.g. 901234567V" required
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                         </div>
                     </div>
-                    
+
                     <div class="grid grid-cols-1 pt-4 border-t border-gray-100">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Invoice Number</label>
-                            <input type="text" id="invoiceNo" placeholder="INV-2026-001" required class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                            <input type="text" id="invoiceNo" placeholder="INV-2026-001" required
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                         </div>
                     </div>
 
@@ -332,39 +432,51 @@
                         <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center">
                             <i data-lucide="bike" class="w-4 h-4 mr-2 text-teal-600"></i> Vehicle Details
                         </h4>
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Chassis Number</label>
-                                <div class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
-                                    <input type="text" id="chassisNo" list="saleChassisList" placeholder="Scan or Enter Chassis..." required class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
+                                <div
+                                    class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
+                                    <input type="text" id="chassisNo" list="saleChassisList"
+                                        placeholder="Scan or Enter Chassis..." required
+                                        class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
                                     <datalist id="saleChassisList"></datalist>
-                                    <button type="button" onclick="lookupVehicle('sale')" class="bg-teal-600 hover:bg-teal-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap" id="btnLookupSale">
+                                    <button type="button" onclick="lookupVehicle('sale')"
+                                        class="bg-teal-600 hover:bg-teal-700 text-white px-5 font-semibold transition-colors flex items-center whitespace-nowrap"
+                                        id="btnLookupSale">
                                         <i data-lucide="search" class="w-4 h-4 mr-2"></i> Find
                                     </button>
                                 </div>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Engine Number</label>
-                                <input type="text" id="engineNo" placeholder="Auto-filled..." required class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                                <input type="text" id="engineNo" placeholder="Auto-filled..." required
+                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                             </div>
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Zuboo Bike Model</label>
-                                <input type="text" id="model" list="zubooModelsList" required onchange="updateColorOptions('model', 'saleColorList')" placeholder="Select or type model..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                                <input type="text" id="model" list="zubooModelsList" required
+                                    onchange="updateColorOptions('model', 'saleColorList')"
+                                    placeholder="Select or type model..."
+                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Specific Color</label>
-                                <input type="text" id="color" list="saleColorList" required placeholder="Select or type color..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
+                                <input type="text" id="color" list="saleColorList" required
+                                    placeholder="Select or type color..."
+                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3.5 transition-colors">
                                 <datalist id="saleColorList"></datalist>
                             </div>
                         </div>
                     </div>
 
                     <div class="pt-6 flex justify-end">
-                        <button type="submit" id="submitBtn" class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-teal-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
+                        <button type="submit" id="submitBtn"
+                            class="bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white font-bold py-3.5 px-8 rounded-xl shadow-lg shadow-teal-500/30 transform hover:-translate-y-0.5 transition-all duration-200 flex items-center">
                             <i data-lucide="check" class="w-5 h-5 mr-2" id="submitIcon"></i>
                             <span id="submitText">Complete Sale</span>
                         </button>
@@ -375,41 +487,49 @@
 
         <!-- TAB 3: Stock Requests -->
         <div id="stockRequests" class="tab-content max-w-6xl mx-auto">
-            
+
             <!-- Send a Request Form -->
             <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden mb-8">
                 <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                     <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                        <div class="bg-indigo-100 p-2 rounded-lg mr-3"><i data-lucide="send" class="w-5 h-5 text-indigo-600"></i></div>
+                        <div class="bg-indigo-100 p-2 rounded-lg mr-3"><i data-lucide="send"
+                                class="w-5 h-5 text-indigo-600"></i></div>
                         Request Stock Transfer
                     </h2>
                 </div>
-                
+
                 <form id="stockRequestForm" class="p-8 space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Target Branch</label>
-                            <select id="reqTargetBranch" required class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
+                            <select id="reqTargetBranch" required
+                                class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
                                 <option value="">Loading branches...</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Model</label>
-                            <input type="text" id="reqModel" list="zubooModelsList" required onchange="updateColorOptions('reqModel', 'reqColorList')" placeholder="Select model..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
+                            <input type="text" id="reqModel" list="zubooModelsList" required
+                                onchange="updateColorOptions('reqModel', 'reqColorList')" placeholder="Select model..."
+                                class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Color</label>
-                            <input type="text" id="reqColor" list="reqColorList" required placeholder="Select color..." class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
+                            <input type="text" id="reqColor" list="reqColorList" required placeholder="Select color..."
+                                class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
                             <datalist id="reqColorList"></datalist>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Quantity</label>
-                            <input type="number" id="reqQty" required min="1" placeholder="Qty" class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
+                            <input type="number" id="reqQty" required min="1" placeholder="Qty"
+                                class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-indigo-500 focus:border-indigo-500 block p-3 transition-colors">
                         </div>
                     </div>
                     <div class="flex justify-end pt-2">
-                        <button type="submit" id="btnSubmitRequest" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all flex items-center">
-                            <i data-lucide="send" class="w-4 h-4 mr-2" id="iconSubmitRequest"></i> <span id="textSubmitRequest">Send Request</span>
+                        <button type="submit" id="btnSubmitRequest"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all flex items-center">
+                            <i data-lucide="send" class="w-4 h-4 mr-2" id="iconSubmitRequest"></i> <span
+                                id="textSubmitRequest">Send Request</span>
                         </button>
                     </div>
                 </form>
@@ -417,14 +537,17 @@
 
             <!-- Tables for Requests -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                
+
                 <!-- Received Requests (Others requesting from YOU) -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-amber-50/50 flex items-center">
-                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="inbox" class="w-5 h-5 text-amber-600"></i></div>
+                        <div class="bg-amber-100 p-2 rounded-lg mr-3"><i data-lucide="inbox"
+                                class="w-5 h-5 text-amber-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">
                             Incoming Requests (Needs Action)
-                            <span id="incomingReqCount" class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            <span id="incomingReqCount"
+                                class="ml-3 bg-amber-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
@@ -438,19 +561,24 @@
                                 </tr>
                             </thead>
                             <tbody id="incomingRequestsTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="4" class="py-6 text-center text-gray-400">Loading requests...</td></tr>
+                                <tr>
+                                    <td colspan="4" class="py-6 text-center text-gray-400">Loading requests...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- Sent Requests (YOU requested from others) -->
-                <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
+                <div
+                    class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col">
                     <div class="px-6 py-5 border-b border-gray-100 bg-blue-50/50 flex items-center">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="arrow-up-right" class="w-5 h-5 text-blue-600"></i></div>
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="arrow-up-right"
+                                class="w-5 h-5 text-blue-600"></i></div>
                         <h3 class="text-lg font-bold text-gray-800">
                             Sent Requests (Status)
-                            <span id="sentReqCount" class="ml-3 bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                            <span id="sentReqCount"
+                                class="ml-3 bg-blue-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
                         </h3>
                     </div>
                     <div class="overflow-x-auto flex-grow p-6">
@@ -464,7 +592,9 @@
                                 </tr>
                             </thead>
                             <tbody id="sentRequestsTableBody" class="divide-y divide-gray-100">
-                                <tr><td colspan="4" class="py-6 text-center text-gray-400">Loading requests...</td></tr>
+                                <tr>
+                                    <td colspan="4" class="py-6 text-center text-gray-400">Loading requests...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -479,46 +609,70 @@
     <footer class="w-full py-6 mt-auto border-t border-gray-200 bg-white/50 z-40 relative">
         <div class="max-w-7xl mx-auto px-4 text-center">
             <p class="text-sm font-medium text-gray-500">
-                &copy; <script>document.write(new Date().getFullYear())</script> ATV Import Pvt Ltd. All rights reserved.
+                &copy;
+                <script>document.write(new Date().getFullYear())</script> ATV Import Pvt Ltd. All rights reserved.
             </p>
         </div>
     </footer>
 
     <!-- Report Generation Modal Popup -->
-    <div id="reportModal" class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="reportModalContent">
-            
+    <div id="reportModal"
+        class="hidden fixed inset-0 z-[120] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col"
+            id="reportModalContent">
+
             <!-- CAPTURE AREA FOR REPORT -->
             <div id="reportCard" class="bg-white w-full">
                 <div class="bg-gray-800 p-8 text-center border-b-4 border-teal-600">
                     <h3 class="text-2xl font-bold text-white mb-1">Vehicle Status Report</h3>
                     <p class="text-gray-400 text-sm">Generated by Zuboo Branch Portal</p>
                 </div>
-                
+
                 <div class="p-8 bg-white space-y-6">
                     <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div><span class="text-gray-500 block mb-1">Model:</span> <span id="repModel" class="font-bold text-gray-900 text-base">-</span></div>
-                        <div><span class="text-gray-500 block mb-1">Color:</span> <span id="repColor" class="font-bold text-gray-900 text-base">-</span></div>
-                        <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis" class="font-mono font-bold text-gray-900 text-base">-</span></div>
-                        <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine" class="font-mono font-bold text-gray-900 text-base">-</span></div>
-                        
-                        <div id="repVehicleNoContainer" class="col-span-2 hidden bg-teal-50 border border-teal-100 p-3 rounded-lg mt-1">
-                            <span class="text-teal-800 block mb-1 text-xs font-bold uppercase tracking-wider">Registered Vehicle No:</span> 
-                            <span id="repVehicleNo" class="font-mono font-bold text-teal-900 text-lg">-</span>
-                        </div>
+                        <div><span class="text-gray-500 block mb-1">Model:</span> <span id="repModel"
+                                class="font-bold text-gray-900 text-base">-</span></div>
+                        <div><span class="text-gray-500 block mb-1">Color:</span> <span id="repColor"
+                                class="font-bold text-gray-900 text-base">-</span></div>
+                        <div><span class="text-gray-500 block mb-1">Chassis No:</span> <span id="repChassis"
+                                class="font-mono font-bold text-gray-900 text-base">-</span></div>
+                        <div><span class="text-gray-500 block mb-1">Engine No:</span> <span id="repEngine"
+                                class="font-mono font-bold text-gray-900 text-base">-</span></div>
 
-                        <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status / Location:</span> <span id="repLocation" class="font-bold text-teal-600 text-lg uppercase tracking-wide">-</span></div>
+                        <div><span class="text-gray-500 block mb-1">Vehicle Reg No:</span> <span
+                                id="repVehicleNumberDisplay" class="font-bold text-red-500 text-base italic">Not
+                                Added</span></div>
+                        <div><span class="text-gray-500 block mb-1">Registered Date:</span> <span
+                                id="repRegisteredDateDisplay" class="font-bold text-red-500 text-base italic">Not
+                                Added</span></div>
+
+                        <div class="col-span-2 mt-2 pt-2 border-t border-gray-100"><span
+                                class="text-gray-500 block mb-1">Current Status / Location:</span> <span
+                                id="repLocation"
+                                class="font-bold text-teal-600 text-lg uppercase tracking-wide">-</span></div>
+
+                        <div class="col-span-2 mt-2"><span class="text-gray-500 block mb-1">Current Status /
+                                Location:</span> <span id="repLocation"
+                                class="font-bold text-teal-600 text-lg uppercase tracking-wide">-</span></div>
                     </div>
-                    
+
                     <div id="repCustomerSection" class="hidden pt-2">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">Sales & Customer Data</h4>
+                        <h4
+                            class="text-sm font-bold text-gray-400 uppercase border-b border-gray-200 pb-2 mb-4 tracking-wider">
+                            Sales & Customer Data</h4>
                         <div class="grid grid-cols-2 gap-4 text-sm">
-                            <div><span class="text-gray-500 block mb-1">Customer Name:</span> <span id="repCustomer" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">NIC:</span> <span id="repNIC" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Invoice No:</span> <span id="repInvoice" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Sale Date:</span> <span id="repDate" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Branch Sold From:</span> <span id="repBranch" class="font-bold text-gray-900 text-base">-</span></div>
-                            <div><span class="text-gray-500 block mb-1">Broker:</span> <span id="repBroker" class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">Customer Name:</span> <span id="repCustomer"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">NIC:</span> <span id="repNIC"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">Invoice No:</span> <span id="repInvoice"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">Sale Date:</span> <span id="repDate"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">Branch Sold From:</span> <span id="repBranch"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
+                            <div><span class="text-gray-500 block mb-1">Broker:</span> <span id="repBroker"
+                                    class="font-bold text-gray-900 text-base">-</span></div>
                         </div>
                     </div>
                 </div>
@@ -526,20 +680,24 @@
 
             <!-- ACTIONS -->
             <div class="p-6 bg-gray-50 flex gap-3 border-t border-gray-200">
-                <button onclick="downloadReportPDF()" id="btnDownloadPdf" class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
+                <button onclick="downloadReportPDF()" id="btnDownloadPdf"
+                    class="flex-1 bg-gray-900 hover:bg-black text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative">
                     <i data-lucide="download" class="w-5 h-5 mr-2"></i> Download as PDF
                 </button>
-                <button onclick="closeReportModal()" class="px-6 py-3 bg-gray-200 text-gray-700 hover:bg-gray-300 font-bold rounded-xl transition-all duration-200 flex items-center justify-center">
+                <button onclick="closeReportModal()"
+                    class="px-6 py-3 bg-gray-200 text-gray-700 hover:bg-gray-300 font-bold rounded-xl transition-all duration-200 flex items-center justify-center">
                     Close
                 </button>
             </div>
-            
+
         </div>
     </div>
 
     <!-- Bulk Report Download Modal -->
-    <div id="bulkReportModal" class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="bulkReportModalContent">
+    <div id="bulkReportModal"
+        class="hidden fixed inset-0 z-[130] flex items-center justify-center bg-gray-900/80 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col"
+            id="bulkReportModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     <i data-lucide="download-cloud" class="w-5 h-5 mr-2 text-teal-600"></i> Download Reports (CSV)
@@ -548,11 +706,15 @@
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            
+
             <!-- Tabs -->
             <div class="flex border-b border-gray-200">
-                <button onclick="switchBulkTab('sales')" id="tab-dl-sales" class="flex-1 py-3 text-sm font-bold text-teal-600 border-b-2 border-teal-600 bg-teal-50/50">Sales Report</button>
-                <button onclick="switchBulkTab('stock')" id="tab-dl-stock" class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Detailed Stock</button>
+                <button onclick="switchBulkTab('sales')" id="tab-dl-sales"
+                    class="flex-1 py-3 text-sm font-bold text-teal-600 border-b-2 border-teal-600 bg-teal-50/50">Sales
+                    Report</button>
+                <button onclick="switchBulkTab('stock')" id="tab-dl-stock"
+                    class="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">Detailed
+                    Stock</button>
             </div>
 
             <div class="p-6">
@@ -561,25 +723,31 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date</label>
-                            <input type="date" id="dlSalesStart" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
+                            <input type="date" id="dlSalesStart"
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">End Date</label>
-                            <input type="date" id="dlSalesEnd" class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
+                            <input type="date" id="dlSalesEnd"
+                                class="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-3">
                         </div>
                     </div>
-                    <button onclick="generateSalesCSV()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
+                    <button onclick="generateSalesCSV()"
+                        class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
                         <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Sales Data
                     </button>
                 </div>
 
                 <!-- Stock Tab Content -->
                 <div id="dl-stock-content" class="space-y-4 hidden">
-                    <div class="bg-teal-50 text-teal-800 text-xs p-3 rounded-lg flex items-start border border-teal-100 mb-2">
+                    <div
+                        class="bg-teal-50 text-teal-800 text-xs p-3 rounded-lg flex items-start border border-teal-100 mb-2">
                         <i data-lucide="info" class="w-4 h-4 mr-2 flex-shrink-0 mt-0.5"></i>
-                        <p>Downloads a detailed CSV report containing the Chassis and Engine numbers for all available stock at your branch.</p>
+                        <p>Downloads a detailed CSV report containing the Chassis and Engine numbers for all available
+                            stock at your branch.</p>
                     </div>
-                    <button onclick="generateStockCSV()" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
+                    <button onclick="generateStockCSV()"
+                        class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center">
                         <i data-lucide="file-spreadsheet" class="w-5 h-5 mr-2"></i> Download Detailed Stock
                     </button>
                 </div>
@@ -588,43 +756,56 @@
     </div>
 
     <!-- Success Modal Popup -->
-    <div id="successModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col" id="successModalContent">
-            
+    <div id="successModal"
+        class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300 my-auto flex flex-col"
+            id="successModalContent">
+
             <!-- CAPTURE AREA -->
             <div id="receiptCard" class="bg-white w-full">
                 <div class="bg-gradient-to-r from-teal-500 to-emerald-500 p-8 text-center relative overflow-hidden">
                     <div class="absolute -top-6 -right-6 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
                     <div class="absolute -bottom-6 -left-6 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
-                    
-                    <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg relative z-10">
+
+                    <div
+                        class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg relative z-10">
                         <i data-lucide="party-popper" class="w-10 h-10 text-teal-500"></i>
                     </div>
                     <h3 class="text-3xl font-extrabold text-white mb-2 relative z-10">Sale Completed!</h3>
-                    <p class="text-teal-50 font-medium text-lg relative z-10">Thank you for choosing Zuboo & ATV Import Pvt Ltd.</p>
+                    <p class="text-teal-50 font-medium text-lg relative z-10">Thank you for choosing Zuboo & ATV Import
+                        Pvt Ltd.</p>
                 </div>
-                
+
                 <div class="p-8 bg-gray-50">
                     <div class="space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200 hidden" id="modalBrokerRow">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200 hidden"
+                            id="modalBrokerRow">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Broker Name</span>
                             <span class="font-bold text-gray-900 text-base" id="modalBrokerName">-</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <div
+                            class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Bike Model</span>
                             <span class="font-bold text-gray-900 text-base" id="modalBikeModel">-</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <div
+                            class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Color</span>
                             <span class="font-bold text-gray-900 text-base" id="modalColor">-</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <div
+                            class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Engine Number</span>
-                            <span class="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-mono text-sm border border-teal-100" id="modalEngineNo">-</span>
+                            <span
+                                class="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-mono text-sm border border-teal-100"
+                                id="modalEngineNo">-</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
+                        <div
+                            class="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-3 border-b border-gray-200">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Chassis Number</span>
-                            <span class="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-mono text-sm border border-teal-100" id="modalChassisNo">-</span>
+                            <span
+                                class="font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded font-mono text-sm border border-teal-100"
+                                id="modalChassisNo">-</span>
                         </div>
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center">
                             <span class="text-gray-500 text-sm font-medium mb-1 sm:mb-0">Date of Sale</span>
@@ -637,24 +818,29 @@
             <!-- ACTIONS -->
             <div class="p-8 pt-0 bg-gray-50 flex flex-col gap-3">
                 <div class="flex gap-2">
-                    <button onclick="shareReceipt(event)" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative text-sm">
+                    <button onclick="shareReceipt(event)"
+                        class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative text-sm">
                         <i data-lucide="share-2" class="w-4 h-4 mr-1.5"></i> Share
                     </button>
-                    <button onclick="downloadReceiptImage(event)" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative text-sm">
+                    <button onclick="downloadReceiptImage(event)"
+                        class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-2 rounded-xl shadow-md transition-all duration-200 flex items-center justify-center relative text-sm">
                         <i data-lucide="image" class="w-4 h-4 mr-1.5"></i> Image
                     </button>
                 </div>
-                <button onclick="closeSuccessModal()" class="mt-2 w-full text-gray-500 hover:text-gray-800 font-bold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
+                <button onclick="closeSuccessModal()"
+                    class="mt-2 w-full text-gray-500 hover:text-gray-800 font-bold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center">
                     Close Window
                 </button>
             </div>
-            
+
         </div>
     </div>
-    
+
     <!-- Color Breakdown Modal Popup -->
-    <div id="colorModal" class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="colorModalContent">
+    <div id="colorModal"
+        class="hidden fixed inset-0 z-[110] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+            id="colorModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     <i data-lucide="palette" class="w-5 h-5 mr-2 text-teal-600"></i> Color Breakdown
@@ -664,7 +850,8 @@
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="colorModalModelName">Model Name</p>
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="colorModalModelName">
+                    Model Name</p>
                 <div id="colorModalList" class="space-y-3">
                     <!-- Color items will be injected here -->
                 </div>
@@ -673,8 +860,10 @@
     </div>
 
     <!-- Total Stock Breakdown Modal Popup -->
-    <div id="totalStockModal" class="hidden fixed inset-0 z-[115] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="totalStockModalContent">
+    <div id="totalStockModal"
+        class="hidden fixed inset-0 z-[115] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+            id="totalStockModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     <i data-lucide="layers" class="w-5 h-5 mr-2 text-blue-600"></i> Total Stock Breakdown
@@ -684,7 +873,8 @@
                 </button>
             </div>
             <div class="p-6 max-h-[65vh] overflow-y-auto hide-scrollbar">
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="totalStockModalModelName">Model Name</p>
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4"
+                    id="totalStockModalModelName">Model Name</p>
                 <div id="totalStockModalList" class="space-y-4">
                     <!-- Location/Color items will be injected here -->
                 </div>
@@ -693,8 +883,10 @@
     </div>
 
     <!-- Parts Breakdown Modal -->
-    <div id="partsStockModal" class="hidden fixed inset-0 z-[116] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="partsStockModalContent">
+    <div id="partsStockModal"
+        class="hidden fixed inset-0 z-[116] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+            id="partsStockModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-orange-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     <i data-lucide="wrench" class="w-5 h-5 mr-2 text-orange-600"></i> Spare Parts Details
@@ -704,7 +896,8 @@
                 </button>
             </div>
             <div class="p-6 max-h-[65vh] overflow-y-auto hide-scrollbar">
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="partsModalLocationLabel">Item Breakdown</p>
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4"
+                    id="partsModalLocationLabel">Item Breakdown</p>
                 <div id="partsStockModalList" class="space-y-2">
                     <!-- Part items will be injected here -->
                 </div>
@@ -713,8 +906,10 @@
     </div>
 
     <!-- Branch Sales Breakdown Modal -->
-    <div id="branchSalesModal" class="hidden fixed inset-0 z-[117] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="branchSalesModalContent">
+    <div id="branchSalesModal"
+        class="hidden fixed inset-0 z-[117] flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-sm w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300"
+            id="branchSalesModalContent">
             <div class="px-6 py-5 border-b border-gray-100 bg-teal-50/50 flex items-center justify-between">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center">
                     <i data-lucide="trending-up" class="w-5 h-5 mr-2 text-teal-600"></i> Sales Breakdown
@@ -724,7 +919,8 @@
                 </button>
             </div>
             <div class="p-6 max-h-[65vh] overflow-y-auto hide-scrollbar">
-                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="branchSalesModalName">Models Sold</p>
+                <p class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4" id="branchSalesModalName">
+                    Models Sold</p>
                 <div id="branchSalesModalList" class="space-y-3">
                     <!-- Model items will be injected here -->
                 </div>
@@ -736,19 +932,19 @@
         // =========================================================================
         // CONFIGURATION: EDIT THESE THREE CONSTANTS FOR EACH BRANCH YOU SET UP
         // =========================================================================
-        
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyQZZnShr7mr8VUk7Q7iCHVrk8WyD7wLwWOzRWTG5gGjTyRKuJOcEmqh_gJJeanhf3S/exec"; 
-        const CURRENT_BRANCH = "THALPITIYA Branch"; 
-        const BRANCH_DISPLAY_NAME = "THALPITIYA Branch"; 
+
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwsx1CYP2YeLZed50O1iXmXPZJIPUcS7eIa3oH5Z4GkMf0HKd6TV2yiNRGOShgigxLWwA/exec";
+        const CURRENT_BRANCH = "THALPITIYA Branch";
+        const BRANCH_DISPLAY_NAME = "THALPITIYA Branch";
 
         // =========================================================================
-        
+
         let globalShowroomStocks = {};
         let globalMainStockColors = {};
-        let globalAvailableChassis = {}; 
-        let globalPartsStock = {}; 
-        let globalSalesData = []; 
-        let globalDetailedStock = {}; 
+        let globalAvailableChassis = {};
+        let globalPartsStock = {};
+        let globalSalesData = [];
+        let globalDetailedStock = {};
         let globalPendingOrders = {};
         let globalStockRequests = []; // NEW: Variable to hold requests
 
@@ -757,12 +953,12 @@
             "KB1": ["White"],
             "Tiger": ["Black/Grey/Golden"],
             "EX008": ["Green"],
-            "Tank": ["Blue","Black"],
-            "GT": ["Black/Green", "Black/Orange","Gray","White/Black","Silver"],
+            "Tank": ["Blue", "Black"],
+            "GT": ["Black/Green", "Black/Orange", "Gray", "White/Black", "Silver"],
             "AE4": ["Gray", "Orange", "White"],
-            "T3": ["White","Blue"],
-            "T11": ["Grey/Green","White/Orange","Grey","White","Blue","Silver"],
-            "T16": ["Grey","White","Blue","Silver","Green"]
+            "T3": ["White", "Blue"],
+            "T11": ["Grey/Green", "White/Orange", "Grey", "White", "Blue", "Silver"],
+            "T16": ["Grey", "White", "Blue", "Silver", "Green"]
         };
 
         function normalizeModelName(name) {
@@ -775,7 +971,7 @@
         window.onload = () => {
             const tzNow = new Date();
             tzNow.setMinutes(tzNow.getMinutes() - tzNow.getTimezoneOffset());
-            const localISODate = tzNow.toISOString().slice(0,10);
+            const localISODate = tzNow.toISOString().slice(0, 10);
             document.getElementById('datetime').value = localISODate;
 
             document.getElementById('displayBranchSale').value = BRANCH_DISPLAY_NAME;
@@ -784,23 +980,23 @@
             });
 
             initMonthYearInputs();
-            populateModelDatalists(); 
+            populateModelDatalists();
             switchTab('analytics');
         };
 
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
-            
+
             const inactiveClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-gray-500 hover:text-gray-900 hover:bg-gray-200/50";
             document.getElementById('btn-salesForm').className = inactiveClass;
             document.getElementById('btn-analytics').className = inactiveClass;
             document.getElementById('btn-stockRequests').className = inactiveClass;
-            
+
             const activeClass = "tab-btn px-5 py-2.5 text-sm font-semibold rounded-xl flex items-center transition-all duration-200 whitespace-nowrap text-teal-700 bg-white shadow-sm ring-1 ring-gray-200";
             document.getElementById('btn-' + tabId).className = activeClass;
 
-            if(tabId === 'analytics' || tabId === 'stockRequests') { fetchAnalytics(); }
+            if (tabId === 'analytics' || tabId === 'stockRequests') { fetchAnalytics(); }
         }
 
         function initMonthYearInputs() {
@@ -829,7 +1025,7 @@
             const modelValue = document.getElementById(modelInputId).value;
             const colorDatalist = document.getElementById(colorDatalistId);
             if (!colorDatalist) return;
-            
+
             colorDatalist.innerHTML = '';
             if (modelValue && ZUBOO_MODELS_COLORS[modelValue]) {
                 ZUBOO_MODELS_COLORS[modelValue].forEach(color => {
@@ -842,7 +1038,7 @@
 
         function updateSaleChassisDatalist() {
             const list = document.getElementById('saleChassisList');
-            if(!list) return;
+            if (!list) return;
             list.innerHTML = '';
             if (globalAvailableChassis[CURRENT_BRANCH]) {
                 globalAvailableChassis[CURRENT_BRANCH].forEach(chassis => {
@@ -856,14 +1052,14 @@
         // NEW: Populate Request Branch Selector
         function populateRequestBranchSelector() {
             const reqBranch = document.getElementById('reqTargetBranch');
-            if(!reqBranch) return;
-            
+            if (!reqBranch) return;
+
             // Keep current value if one is selected
             const currentVal = reqBranch.value;
-            
+
             reqBranch.innerHTML = '<option value="">Select Target Branch...</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
-            
-            if(globalShowroomStocks) {
+
+            if (globalShowroomStocks) {
                 Object.keys(globalShowroomStocks).forEach(branch => {
                     if (branch !== CURRENT_BRANCH) {
                         const opt = document.createElement('option');
@@ -873,25 +1069,25 @@
                     }
                 });
             }
-            if(currentVal) reqBranch.value = currentVal;
+            if (currentVal) reqBranch.value = currentVal;
         }
 
         function showNotification(message, type = 'success') {
             const banner = document.getElementById('notification');
             const msgEl = document.getElementById('notif-message');
             const iconEl = document.getElementById('notif-icon');
-            
+
             msgEl.textContent = message;
             banner.className = "max-w-md mx-auto mb-6 p-4 rounded-xl flex items-center justify-between shadow-lg transform transition-all duration-300 z-[999] relative";
-            
-            if(type === 'success') {
+
+            if (type === 'success') {
                 banner.classList.add('bg-emerald-50', 'text-emerald-800', 'border', 'border-emerald-200');
                 iconEl.setAttribute('data-lucide', 'check-circle');
-                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-emerald-500');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length - 1], 'text-emerald-500');
             } else {
                 banner.classList.add('bg-red-50', 'text-red-800', 'border', 'border-red-200');
                 iconEl.setAttribute('data-lucide', 'alert-circle');
-                iconEl.classList.replace(iconEl.classList[iconEl.classList.length-1], 'text-red-500');
+                iconEl.classList.replace(iconEl.classList[iconEl.classList.length - 1], 'text-red-500');
             }
             lucide.createIcons();
             banner.classList.remove('hidden');
@@ -904,7 +1100,7 @@
 
         function showSuccessModal(brokerName, model, color, engine, chassis, dateStr) {
             const brokerRow = document.getElementById('modalBrokerRow');
-            if(brokerName) {
+            if (brokerName) {
                 document.getElementById('modalBrokerName').textContent = brokerName;
                 brokerRow.classList.remove('hidden');
                 brokerRow.classList.add('flex');
@@ -917,7 +1113,7 @@
             document.getElementById('modalColor').textContent = color;
             document.getElementById('modalEngineNo').textContent = engine;
             document.getElementById('modalChassisNo').textContent = chassis;
-            
+
             const [year, month, day] = dateStr.split('-');
             const formattedDate = new Date(year, month - 1, day).toLocaleDateString(undefined, {
                 year: 'numeric', month: 'short', day: 'numeric'
@@ -926,10 +1122,10 @@
 
             const modal = document.getElementById('successModal');
             const content = document.getElementById('successModalContent');
-            
+
             modal.classList.remove('hidden');
-            lucide.createIcons(); 
-            
+            lucide.createIcons();
+
             setTimeout(() => {
                 content.classList.remove('scale-95', 'opacity-0');
                 content.classList.add('scale-100', 'opacity-100');
@@ -948,7 +1144,7 @@
             const element = document.getElementById('receiptCard');
             const originalRadius = element.style.borderRadius;
             element.style.borderRadius = "0";
-            await new Promise(r => setTimeout(r, 200)); 
+            await new Promise(r => setTimeout(r, 200));
             const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
             element.style.borderRadius = originalRadius;
             return canvas;
@@ -959,13 +1155,13 @@
                 const btn = e.currentTarget;
                 const originalHTML = btn.innerHTML;
                 btn.innerHTML = '<span class="loader !border-t-teal-600 !w-4 !h-4"></span> Saving...';
-                
+
                 const canvas = await getReceiptCanvas();
                 const link = document.createElement('a');
                 link.download = `Zuboo_Sale_${new Date().getTime()}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-                
+
                 btn.innerHTML = originalHTML;
             } catch (err) { showNotification("Failed to save image.", "error"); }
         }
@@ -991,7 +1187,7 @@
                     btn.innerHTML = originalHTML;
                 }, 'image/png');
             } catch (err) {
-                if(err.name !== 'AbortError') { showNotification("Failed to share.", "error"); }
+                if (err.name !== 'AbortError') { showNotification("Failed to share.", "error"); }
                 e.currentTarget.innerHTML = '<i data-lucide="share-2" class="w-5 h-5 mr-2"></i> Share';
                 lucide.createIcons();
             }
@@ -1000,8 +1196,8 @@
         async function generateReport() {
             if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
             const query = document.getElementById('reportSearchQuery').value.trim();
-            if(!query) { showNotification("Please enter a Chassis or Invoice number.", "error"); return; }
-            
+            if (!query) { showNotification("Please enter a Chassis or Invoice number.", "error"); return; }
+
             const btn = document.getElementById('btnGenerateReport');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Searching...';
@@ -1014,46 +1210,57 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await response.json();
-                
-                if(result.status === 'success') {
+
+                if (result.status === 'success') {
                     populateReportModal(result.data);
                 } else {
                     showNotification("Error: " + result.message, "error");
                 }
-            } catch(e) {
+            } catch (e) {
                 showNotification("Connection error during search.", "error");
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         }
-        
+
         function populateReportModal(data) {
             document.getElementById('repModel').textContent = data.model || 'N/A';
             document.getElementById('repColor').textContent = data.color || 'N/A';
             document.getElementById('repChassis').textContent = data.chassis || 'N/A';
             document.getElementById('repEngine').textContent = data.engine || 'N/A';
-            
-            const vehicleContainer = document.getElementById('repVehicleNoContainer');
-            const vehicleEl = document.getElementById('repVehicleNo');
-            
-            if (data.vehicleNo && data.vehicleNo.toString().trim() !== '') {
-                vehicleEl.textContent = data.vehicleNo;
-                vehicleContainer.classList.remove('hidden');
+            document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
+
+            // Logic for Vehicle Reg No
+            const vehNo = data.vehicleNumber || data.vehicleNo;
+            const vehDisplay = document.getElementById('repVehicleNumberDisplay');
+            if (vehNo && vehNo.toString().trim() !== '') {
+                vehDisplay.textContent = vehNo;
+                vehDisplay.className = 'font-bold text-gray-900 text-base';
             } else {
-                vehicleContainer.classList.add('hidden');
-                vehicleEl.textContent = '-';
+                vehDisplay.textContent = 'Not Added';
+                vehDisplay.className = 'font-bold text-red-500 text-base italic';
             }
 
-            document.getElementById('repLocation').textContent = data.location ? data.location.replace(/_/g, ' ') : 'N/A';
-            
+            // Logic for Registered Date
+            const regDate = data.registeredDate;
+            const dateDisplay = document.getElementById('repRegisteredDateDisplay');
+            if (regDate && regDate.toString().trim() !== '') {
+                const d = new Date(regDate);
+                dateDisplay.textContent = isNaN(d.getTime()) ? regDate : d.toLocaleDateString();
+                dateDisplay.className = 'font-bold text-gray-900 text-base';
+            } else {
+                dateDisplay.textContent = 'Not Added';
+                dateDisplay.className = 'font-bold text-red-500 text-base italic';
+            }
+
             const custSection = document.getElementById('repCustomerSection');
             if (data.isSold) {
                 custSection.classList.remove('hidden');
                 document.getElementById('repCustomer').textContent = data.customerName || 'N/A';
                 document.getElementById('repNIC').textContent = data.nic || 'N/A';
                 document.getElementById('repInvoice').textContent = data.invoiceNo || 'N/A';
-                
+
                 const d = new Date(data.saleDate);
                 document.getElementById('repDate').textContent = isNaN(d) ? data.saleDate : d.toLocaleDateString();
                 document.getElementById('repBranch').textContent = data.branch ? data.branch.replace(/_/g, ' ') : 'N/A';
@@ -1061,7 +1268,7 @@
             } else {
                 custSection.classList.add('hidden');
             }
-            
+
             const modal = document.getElementById('reportModal');
             const content = document.getElementById('reportModalContent');
             modal.classList.remove('hidden');
@@ -1069,10 +1276,10 @@
                 content.classList.remove('scale-95', 'opacity-0');
                 content.classList.add('scale-100', 'opacity-100');
             }, 10);
-            
+
             lucide.createIcons();
         }
-        
+
         function closeReportModal() {
             const modal = document.getElementById('reportModal');
             const content = document.getElementById('reportModalContent');
@@ -1080,30 +1287,30 @@
             content.classList.add('scale-95', 'opacity-0');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
-        
+
         async function downloadReportPDF() {
             const btn = document.getElementById('btnDownloadPdf');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Generating...';
             btn.disabled = true;
-            
+
             try {
                 const { jsPDF } = window.jspdf;
                 const element = document.getElementById('reportCard');
                 element.style.borderRadius = "0";
-                
+
                 const canvas = await html2canvas(element, { scale: 2, useCORS: true, backgroundColor: "#ffffff" });
                 const imgData = canvas.toDataURL('image/png');
-                
+
                 const pdf = new jsPDF('p', 'mm', 'a4');
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                
+
                 pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
                 const chassis = document.getElementById('repChassis').textContent;
                 pdf.save(`Vehicle_Report_${chassis}.pdf`);
-                
-                element.style.borderRadius = ""; 
+
+                element.style.borderRadius = "";
             } catch (e) {
                 console.error(e);
                 showNotification("Failed to generate PDF.", "error");
@@ -1117,10 +1324,10 @@
             document.getElementById('colorModalModelName').textContent = modelName;
             const listContainer = document.getElementById('colorModalList');
             listContainer.innerHTML = '';
-            
+
             const colors = Object.keys(colorDataObj).filter(c => c !== "undefined");
-            
-            if(colors.length === 0) {
+
+            if (colors.length === 0) {
                 listContainer.innerHTML = '<p class="text-sm text-gray-500">No color data available.</p>';
             } else {
                 colors.forEach(color => {
@@ -1155,7 +1362,7 @@
             document.getElementById('totalStockModalModelName').textContent = modelName;
             const listContainer = document.getElementById('totalStockModalList');
             listContainer.innerHTML = '';
-            
+
             let hasAnyStock = false;
 
             // 1. Main Warehouse Breakdown
@@ -1171,7 +1378,7 @@
                         colorHtml += `<div class="flex justify-between items-center py-1.5 pl-4 border-b border-blue-50/50 last:border-0"><span class="text-gray-600 text-sm font-medium">${displayColor}</span><span class="bg-white/80 text-blue-900 text-xs font-bold px-2 py-0.5 rounded-full ring-1 ring-blue-100">${qty}</span></div>`;
                     }
                 });
-                
+
                 if (mainTotal > 0) {
                     hasAnyStock = true;
                     const section = document.createElement('div');
@@ -1197,7 +1404,7 @@
                     if (modelInfo) {
                         let qty = 0;
                         let colorData = {};
-                        
+
                         if (typeof modelInfo === 'number') {
                             qty = modelInfo;
                             colorData = { "Unspecified Color": qty };
@@ -1251,7 +1458,7 @@
                 content.classList.add('scale-100', 'opacity-100');
             }, 10);
         }
-        
+
         function closeTotalStockModal() {
             const modal = document.getElementById('totalStockModal');
             const content = document.getElementById('totalStockModalContent');
@@ -1262,10 +1469,10 @@
 
         function showPartsModal(locationName, partsMap) {
             document.getElementById('partsModalLocationLabel').textContent = locationName ? `Location: ${locationName}` : 'Item Breakdown';
-            
+
             const listContainer = document.getElementById('partsStockModalList');
             listContainer.innerHTML = '';
-            
+
             if (partsMap && Object.keys(partsMap).length > 0) {
                 Object.keys(partsMap).forEach(part => {
                     const qty = parseInt(partsMap[part]);
@@ -1311,14 +1518,14 @@
                 'custom_range': 'Custom Range'
             };
             const filterLabel = filterMap[filterType] || 'Current Month';
-            
+
             document.getElementById('branchSalesModalName').textContent = branchName.replace(/_/g, ' ') + ` Sales (${filterLabel})`;
             const listContainer = document.getElementById('branchSalesModalList');
             listContainer.innerHTML = '';
-            
+
             const models = Object.keys(modelDataObj || {});
-            
-            if(models.length === 0) {
+
+            if (models.length === 0) {
                 listContainer.innerHTML = '<p class="text-sm text-gray-500">No sales data available for this period.</p>';
             } else {
                 models.forEach(model => {
@@ -1355,7 +1562,7 @@
             const hasBroker = document.getElementById('hasBroker').checked;
             const container = document.getElementById('brokerNameContainer');
             const input = document.getElementById('brokerName');
-            
+
             if (hasBroker) {
                 container.classList.remove('hidden');
                 container.classList.add('grid');
@@ -1370,33 +1577,33 @@
 
         async function lookupVehicle(type) {
             if (!WEB_APP_URL) { showNotification("Set WEB_APP_URL first!", "error"); return; }
-            
+
             const chassisInput = document.getElementById('chassisNo');
             const btn = document.getElementById('btnLookupSale');
             const chassis = chassisInput.value.trim();
             const expectedLocation = CURRENT_BRANCH;
-            
-            if(!chassis) { showNotification("Please enter a Chassis Number first.", "error"); return; }
-            
+
+            if (!chassis) { showNotification("Please enter a Chassis Number first.", "error"); return; }
+
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<span class="loader !w-4 !h-4 !mr-1 !border-t-white"></span> Wait...';
             btn.disabled = true;
 
             try {
                 const payload = { action: 'lookupChassis', chassis: chassis };
-                
+
                 const response = await fetch(WEB_APP_URL, {
                     method: 'POST', body: JSON.stringify(payload),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await response.json();
-                
-                if(result.status === 'success') {
+
+                if (result.status === 'success') {
                     if (result.data.location !== expectedLocation) {
-                         showNotification(`Vehicle is currently located in ${result.data.location}, not ${expectedLocation}.`, "error");
-                         btn.innerHTML = originalHTML;
-                         btn.disabled = false;
-                         return;
+                        showNotification(`Vehicle is currently located in ${result.data.location}, not ${expectedLocation}.`, "error");
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                        return;
                     }
 
                     document.getElementById('engineNo').value = result.data.engine;
@@ -1407,7 +1614,7 @@
                 } else {
                     showNotification("Error: " + result.message, "error");
                 }
-            } catch(e) {
+            } catch (e) {
                 showNotification("Connection error during lookup.", "error");
             } finally {
                 btn.innerHTML = originalHTML;
@@ -1415,7 +1622,7 @@
             }
         }
 
-        document.getElementById('newSaleForm').addEventListener('submit', async function(e) {
+        document.getElementById('newSaleForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL at the top of the script!", "error"); return; }
 
@@ -1432,10 +1639,10 @@
             const soldEngine = document.getElementById('engineNo').value;
             const soldChassis = document.getElementById('chassisNo').value.trim();
             const soldDate = document.getElementById('datetime').value;
-            
+
             const hasBroker = document.getElementById('hasBroker').checked;
             const brokerNameValue = hasBroker && document.getElementById('brokerName') ? document.getElementById('brokerName').value : "";
-            
+
             const availableInBranch = (globalAvailableChassis[CURRENT_BRANCH] || []).map(c => String(c).toLowerCase());
             if (!availableInBranch.includes(soldChassis.toLowerCase())) {
                 showNotification("Error: Chassis Number is not available in your branch inventory.", "error");
@@ -1444,7 +1651,7 @@
                 btnIcon.style.display = 'block';
                 return;
             }
-            
+
             const payload = {
                 action: 'recordSale', showroom: CURRENT_BRANCH, datetime: soldDate,
                 customerName: document.getElementById('customerName').value,
@@ -1456,22 +1663,22 @@
             try {
                 const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 const result = await response.json();
-                
-                if(result.status === 'success') {
+
+                if (result.status === 'success') {
                     this.reset();
                     document.getElementById('hasBroker').checked = false;
                     toggleBrokerField();
-                    
+
                     const tzNow = new Date();
                     tzNow.setMinutes(tzNow.getMinutes() - tzNow.getTimezoneOffset());
-                    document.getElementById('datetime').value = tzNow.toISOString().slice(0,10);
-                    
+                    document.getElementById('datetime').value = tzNow.toISOString().slice(0, 10);
+
                     document.getElementById('color').value = '';
                     showSuccessModal(brokerNameValue, soldModel, soldColor, soldEngine, soldChassis, soldDate);
                     fetchAnalytics();
                 } else { showNotification("Error: " + result.message, "error"); }
-            } catch (error) { 
-                showNotification("Connection error. Check console.", "error"); 
+            } catch (error) {
+                showNotification("Connection error. Check console.", "error");
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Complete Sale';
@@ -1480,7 +1687,7 @@
         });
 
         // --- NEW: STOCK REQUEST LOGIC ---
-        document.getElementById('stockRequestForm').addEventListener('submit', async function(e) {
+        document.getElementById('stockRequestForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL!", "error"); return; }
 
@@ -1505,16 +1712,16 @@
             try {
                 const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 const result = await response.json();
-                
-                if(result.status === 'success') {
+
+                if (result.status === 'success') {
                     showNotification("Stock Request Sent Successfully!", "success");
                     this.reset();
                     fetchAnalytics(); // Refresh tables
-                } else { 
-                    showNotification("Error: " + result.message, "error"); 
+                } else {
+                    showNotification("Error: " + result.message, "error");
                 }
-            } catch (error) { 
-                showNotification("Connection error.", "error"); 
+            } catch (error) {
+                showNotification("Connection error.", "error");
             } finally {
                 btn.disabled = false;
                 btnText.innerText = 'Send Request';
@@ -1524,20 +1731,20 @@
 
         async function handleRequestAction(requestId, newStatus) {
             if (!WEB_APP_URL) { showNotification("Please set the WEB_APP_URL!", "error"); return; }
-            
+
             try {
                 const payload = { action: 'updateStockRequest', requestId: requestId, status: newStatus };
                 const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 const result = await response.json();
-                
-                if(result.status === 'success') {
+
+                if (result.status === 'success') {
                     showNotification(`Request marked as ${newStatus}!`, "success");
                     fetchAnalytics(); // Refresh tables
-                } else { 
-                    showNotification("Error: " + result.message, "error"); 
+                } else {
+                    showNotification("Error: " + result.message, "error");
                 }
-            } catch (error) { 
-                showNotification("Connection error.", "error"); 
+            } catch (error) {
+                showNotification("Connection error.", "error");
             }
         }
 
@@ -1547,19 +1754,19 @@
             const sentCountSpan = document.getElementById('sentReqCount');
             const incCountSpan = document.getElementById('incomingReqCount');
 
-            if(!sentBody || !incBody) return;
-            
+            if (!sentBody || !incBody) return;
+
             sentBody.innerHTML = '';
             incBody.innerHTML = '';
-            
+
             let sentCount = 0;
             let incCount = 0;
 
-            if(!requestsArray || requestsArray.length === 0) {
+            if (!requestsArray || requestsArray.length === 0) {
                 sentBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No sent requests.</td></tr>';
                 incBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No incoming requests.</td></tr>';
-                if(sentCountSpan) sentCountSpan.innerText = '0';
-                if(incCountSpan) incCountSpan.innerText = '0';
+                if (sentCountSpan) sentCountSpan.innerText = '0';
+                if (incCountSpan) incCountSpan.innerText = '0';
                 return;
             }
 
@@ -1577,15 +1784,15 @@
                 // Helper to format date
                 let displayDate = dateStr;
                 const d = new Date(dateStr);
-                if(!isNaN(d)) {
-                    displayDate = d.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+                if (!isNaN(d)) {
+                    displayDate = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
                 }
 
                 // Helper for status badge
                 let statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-gray-100 text-gray-800 ring-gray-600/20">${status}</span>`;
-                if(status.toLowerCase() === 'pending') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-amber-100 text-amber-800 ring-amber-600/20">${status}</span>`;
-                if(status.toLowerCase() === 'accepted') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-emerald-100 text-emerald-800 ring-emerald-600/20">${status}</span>`;
-                if(status.toLowerCase() === 'rejected') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-red-100 text-red-800 ring-red-600/20">${status}</span>`;
+                if (status.toLowerCase() === 'pending') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-amber-100 text-amber-800 ring-amber-600/20">${status}</span>`;
+                if (status.toLowerCase() === 'accepted') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-emerald-100 text-emerald-800 ring-emerald-600/20">${status}</span>`;
+                if (status.toLowerCase() === 'rejected') statusBadge = `<span class="px-2.5 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-red-100 text-red-800 ring-red-600/20">${status}</span>`;
 
                 // SENT REQUESTS
                 if (fromBranch === CURRENT_BRANCH) {
@@ -1606,7 +1813,7 @@
                     incCount++;
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50 transition-colors";
-                    
+
                     let actionHtml = '-';
                     if (status.toLowerCase() === 'pending') {
                         actionHtml = `
@@ -1627,11 +1834,11 @@
                 }
             });
 
-            if(sentCount === 0) sentBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No sent requests.</td></tr>';
-            if(incCount === 0) incBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No incoming requests.</td></tr>';
-            
-            if(sentCountSpan) sentCountSpan.innerText = sentCount;
-            if(incCountSpan) incCountSpan.innerText = incCount;
+            if (sentCount === 0) sentBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No sent requests.</td></tr>';
+            if (incCount === 0) incBody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-gray-400">No incoming requests.</td></tr>';
+
+            if (sentCountSpan) sentCountSpan.innerText = sentCount;
+            if (incCountSpan) incCountSpan.innerText = incCount;
             lucide.createIcons();
         }
 
@@ -1700,18 +1907,18 @@
             }
 
             let filtered = globalSalesData.filter(row => {
-                if (row[1] !== branch) return false; 
-                
+                if (row[1] !== branch) return false;
+
                 const saleDate = new Date(row[0]);
                 if (!isNaN(saleDate.getTime())) {
                     if (start) {
                         const startDate = new Date(start);
-                        startDate.setHours(0,0,0,0);
+                        startDate.setHours(0, 0, 0, 0);
                         if (saleDate < startDate) return false;
                     }
                     if (end) {
                         const endDate = new Date(end);
-                        endDate.setHours(23,59,59,999);
+                        endDate.setHours(23, 59, 59, 999);
                         if (saleDate > endDate) return false;
                     }
                 }
@@ -1727,10 +1934,10 @@
                 let csvRow = row.map(cell => {
                     let cellStr = String(cell || '');
                     if (cell instanceof Date || (!isNaN(Date.parse(cellStr)) && cellStr.includes('T'))) {
-                       const d = new Date(cellStr);
-                       if(!isNaN(d)) cellStr = d.toLocaleDateString();
+                        const d = new Date(cellStr);
+                        if (!isNaN(d)) cellStr = d.toLocaleDateString();
                     }
-                    return `"${cellStr.replace(/"/g, '""')}"`; 
+                    return `"${cellStr.replace(/"/g, '""')}"`;
                 });
                 csvContent += csvRow.join(',') + '\n';
             });
@@ -1759,8 +1966,8 @@
                     if (bike[0] === locKey) {
                         let dateStr = String(bike[5] || '');
                         if (bike[5] instanceof Date || (!isNaN(Date.parse(dateStr)) && dateStr.includes('T'))) {
-                           const d = new Date(dateStr);
-                           if(!isNaN(d)) dateStr = d.toLocaleDateString();
+                            const d = new Date(dateStr);
+                            if (!isNaN(d)) dateStr = d.toLocaleDateString();
                         }
                         locationRows += `"${bike[1]}","${bike[2]}","${bike[3]}","${bike[4]}","${dateStr}"\n`;
                         locCount++;
@@ -1770,7 +1977,7 @@
 
                 const isNestedParts = Object.keys(globalPartsStock).some(k => typeof globalPartsStock[k] === 'object');
                 let partsMap = isNestedParts ? (globalPartsStock[locKey] || {}) : (locKey === 'Main_Stock' ? globalPartsStock : {});
-                
+
                 Object.keys(partsMap).forEach(part => {
                     const qty = parseInt(partsMap[part]);
                     if (qty > 0) {
@@ -1812,16 +2019,16 @@
 
                 const response = await fetch(noCacheUrl);
                 const data = await response.json();
-                if(data.status === 'success') {
+                if (data.status === 'success') {
                     globalShowroomStocks = data.showroomStocks || {};
                     globalMainStockColors = data.mainStockColors || {}; // For Total Stock Breakdown
                     globalAvailableChassis = data.availableChassis || {};
-                    globalPartsStock = data.partsStock || {}; 
-                    globalSalesData = data.sales || []; 
-                    globalDetailedStock = data.detailedStock || []; 
+                    globalPartsStock = data.partsStock || {};
+                    globalSalesData = data.sales || [];
+                    globalDetailedStock = data.detailedStock || [];
                     globalPendingOrders = data.pendingOrders || {};
                     globalStockRequests = data.stockRequests || []; // NEW: load stock requests
-                    
+
                     // Track global models and colors to keep datalists in sync
                     Object.keys(globalMainStockColors).forEach(model => {
                         if (!ZUBOO_MODELS_COLORS[model]) ZUBOO_MODELS_COLORS[model] = [];
@@ -1848,11 +2055,11 @@
         function renderTotalStock(mainStockArray) {
             const tbody = document.getElementById('totalStockTableBody');
             const countSpan = document.getElementById('totalInventoryCount');
-            if(!tbody) return;
+            if (!tbody) return;
             tbody.innerHTML = '';
-            
+
             let totalStockMap = {};
-            let displayNames = {}; 
+            let displayNames = {};
             let totalPartsMap = {};
             let totalPartsCount = 0;
             let grandTotal = 0;
@@ -1861,7 +2068,7 @@
             Object.keys(ZUBOO_MODELS_COLORS).forEach(m => {
                 const norm = normalizeModelName(m);
                 totalStockMap[norm] = 0;
-                displayNames[norm] = m; 
+                displayNames[norm] = m;
             });
 
             // Calculate Parts Stock
@@ -1911,7 +2118,7 @@
 
             // Render Rows 
             const sortedNormNames = Object.keys(totalStockMap).sort();
-            
+
             sortedNormNames.forEach(norm => {
                 const qty = totalStockMap[norm];
                 const originalName = displayNames[norm];
@@ -1924,22 +2131,22 @@
                 const tdModel = document.createElement('td');
                 tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
                 tdModel.innerHTML = `${originalName} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
-                
+
                 const tdQty = document.createElement('td');
                 tdQty.className = "py-3 text-right";
-                
+
                 let badgeClass = "bg-blue-100 text-blue-800 ring-blue-600/20";
-                if (qty === 0) badgeClass = "bg-gray-100 text-gray-400 ring-gray-300"; 
+                if (qty === 0) badgeClass = "bg-gray-100 text-gray-400 ring-gray-300";
                 else if (qty <= 5) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
                 else if (qty <= 15) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
 
                 tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
-                
+
                 tr.appendChild(tdModel);
                 tr.appendChild(tdQty);
                 tbody.appendChild(tr);
             });
-            
+
             // Render Parts Row
             if (totalPartsCount > 0) {
                 grandTotal += totalPartsCount;
@@ -1957,7 +2164,7 @@
                 tbody.appendChild(tr);
             }
 
-            if(countSpan) countSpan.innerText = grandTotal;
+            if (countSpan) countSpan.innerText = grandTotal;
             lucide.createIcons();
         }
 
@@ -1965,7 +2172,7 @@
             const typeVal = document.getElementById('branchSalesFilterType').value;
             const specificMonthEl = document.getElementById('branchSalesFilterSpecificMonth');
             const rangeEl = document.getElementById('branchSalesFilterRange');
-            
+
             if (typeVal === 'specific_month') {
                 specificMonthEl.classList.remove('hidden');
                 specificMonthEl.classList.add('flex');
@@ -1987,8 +2194,8 @@
 
         function applyBranchSalesFilter() {
             let mySalesCount = 0;
-            let mySalesModels = {}; 
-            
+            let mySalesModels = {};
+
             const filterType = document.getElementById('branchSalesFilterType').value;
             const now = new Date();
             const currentMonth = now.getMonth();
@@ -2012,9 +2219,9 @@
                         } else if (filterType === 'this_year') {
                             include = (saleDate.getFullYear() === currentYear);
                         } else if (filterType === 'specific_month') {
-                            const monthVal = document.getElementById('branchSalesFilterMonthOnly').value; 
+                            const monthVal = document.getElementById('branchSalesFilterMonthOnly').value;
                             const yearVal = document.getElementById('branchSalesFilterYear').value;
-                            if(!monthVal || !yearVal) {
+                            if (!monthVal || !yearVal) {
                                 include = true;
                             } else {
                                 include = (saleDate.getFullYear() === parseInt(yearVal) && saleDate.getMonth() === (parseInt(monthVal) - 1));
@@ -2022,16 +2229,16 @@
                         } else if (filterType === 'custom_range') {
                             const startVal = document.getElementById('branchSalesFilterStart').value;
                             const endVal = document.getElementById('branchSalesFilterEnd').value;
-                            
+
                             include = true;
                             if (startVal) {
                                 const startDate = new Date(startVal);
-                                startDate.setHours(0,0,0,0);
+                                startDate.setHours(0, 0, 0, 0);
                                 if (saleDate < startDate) include = false;
                             }
                             if (endVal) {
                                 const endDate = new Date(endVal);
-                                endDate.setHours(23,59,59,999);
+                                endDate.setHours(23, 59, 59, 999);
                                 if (saleDate > endDate) include = false;
                             }
                         }
@@ -2046,11 +2253,11 @@
             }
 
             document.getElementById('statTotalSales').innerText = mySalesCount;
-            
+
             const salesWidget = document.getElementById('salesWidgetClickable');
             if (salesWidget) {
                 salesWidget.onclick = (e) => {
-                    if(e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'option') return;
+                    if (e.target.tagName.toLowerCase() === 'select' || e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'option') return;
                     showBranchSalesModal(BRANCH_DISPLAY_NAME, mySalesModels, filterType);
                 };
             }
@@ -2073,14 +2280,14 @@
 
             if (models.length === 0 && branchPartsCount === 0) {
                 const countSpan = document.getElementById('showroomInventoryCount');
-                if(countSpan) countSpan.innerText = '0';
+                if (countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No inventory data found for this branch.</td></tr>';
             } else {
                 models.forEach(model => {
                     const modelInfo = myStock[model];
                     let qty = 0;
                     let colorData = {};
-                    
+
                     if (typeof modelInfo === 'number') {
                         qty = modelInfo;
                         colorData = { "Unspecified Color": qty };
@@ -2089,7 +2296,7 @@
                         colorData = modelInfo.colors || {};
                         if (Object.keys(colorData).length === 0) colorData = { "Unspecified Color": qty };
                     }
-                    
+
                     grandTotal += parseInt(qty);
 
                     const tr = document.createElement('tr');
@@ -2099,42 +2306,42 @@
                     const tdModel = document.createElement('td');
                     tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
                     tdModel.innerHTML = `${model} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
-                    
+
                     const tdQty = document.createElement('td');
                     tdQty.className = "py-3 text-right";
-                    
+
                     let badgeClass = "bg-teal-100 text-teal-800 ring-teal-600/20";
                     if (qty <= 0) badgeClass = "bg-red-100 text-red-700 ring-red-600/10";
                     else if (qty <= 2) badgeClass = "bg-orange-100 text-orange-700 ring-orange-600/20";
 
                     tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring ${badgeClass}">${qty}</span>`;
-                    
+
                     tr.appendChild(tdModel);
                     tr.appendChild(tdQty);
                     tbody.appendChild(tr);
                 });
-                
+
                 if (branchPartsCount > 0) {
                     const tr = document.createElement('tr');
                     tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
-                    
+
                     tr.onclick = () => showPartsModal(BRANCH_DISPLAY_NAME, branchPartsMap);
-                    
+
                     const tdModel = document.createElement('td');
                     tdModel.className = "py-4 font-bold text-orange-800 flex items-center";
                     tdModel.innerHTML = `<i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>`;
-                    
+
                     const tdQty = document.createElement('td');
                     tdQty.className = "py-4 text-right";
                     tdQty.innerHTML = `<span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>`;
-                    
+
                     tr.appendChild(tdModel);
                     tr.appendChild(tdQty);
                     tbody.appendChild(tr);
                 }
-                
+
                 const countSpan = document.getElementById('showroomInventoryCount');
-                if(countSpan) countSpan.innerText = grandTotal;
+                if (countSpan) countSpan.innerText = grandTotal;
             }
 
             renderPendingOrders();
@@ -2144,44 +2351,45 @@
         function renderPendingOrders() {
             const tbody = document.getElementById('pendingOrdersTableBody');
             const countSpan = document.getElementById('pendingOrdersCount');
-            if(!tbody) return;
-            
+            if (!tbody) return;
+
             tbody.innerHTML = '';
             let grandTotal = 0;
-            
+
             const models = Object.keys(globalPendingOrders || {});
-            
+
             if (models.length === 0) {
-                if(countSpan) countSpan.innerText = '0';
+                if (countSpan) countSpan.innerText = '0';
                 tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-gray-400">No pending orders found.</td></tr>';
                 return;
             }
 
             models.forEach(model => {
                 const qty = parseInt(globalPendingOrders[model]) || 0;
-                if(qty > 0) {
+                if (qty > 0) {
                     grandTotal += qty;
-                    
+
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-gray-50 transition-colors";
-                    
+
                     const tdModel = document.createElement('td');
                     tdModel.className = "py-3 font-medium text-gray-800";
                     tdModel.innerText = model;
-                    
+
                     const tdQty = document.createElement('td');
                     tdQty.className = "py-3 text-right";
                     tdQty.innerHTML = `<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-amber-100 text-amber-800 ring-amber-600/20">${qty}</span>`;
-                    
+
                     tr.appendChild(tdModel);
                     tr.appendChild(tdQty);
                     tbody.appendChild(tr);
                 }
             });
-            
-            if(countSpan) countSpan.innerText = grandTotal;
+
+            if (countSpan) countSpan.innerText = grandTotal;
         }
 
     </script>
 </body>
+
 </html>
