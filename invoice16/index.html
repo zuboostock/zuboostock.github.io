@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATV Invoice Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+        /* Form Styling */
+        .form-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 350px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .form-container h2 { margin-top: 0; font-size: 20px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
+        .form-group input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;}
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        button:hover { background: #218838; }
+        .btn-primary { background: #007bff; margin-bottom: 15px; }
+        .btn-primary:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; margin-top: 25px; }
+        .btn-danger:hover { background: #c82333; }
+
+        /* Invoice Preview Styling - FORCED A4 DIMENSIONS */
+        .invoice-preview-container {
+            background: white;
+            width: 210mm;
+            height: 296mm; 
+            padding: 2mm 15mm 15mm 15mm; 
+            box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .company-name { 
+            font-weight: bold; 
+            font-size: 20px; 
+            margin-top: 0;
+            margin-bottom: 5px; 
+            text-align: center; 
+        }
+        
+        .invoice-header { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            font-size: 22px; 
+            font-weight: bold; 
+            text-decoration: underline; 
+            margin-top: 0;
+        }
+        
+        .info-table { width: 100%; margin-bottom: 25px; border-collapse: collapse; font-size: 14px; }
+        .info-table td { padding: 4px; vertical-align: top; }
+        
+        .item-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; font-size: 14px; }
+        .item-table th, .item-table td { border: 1px solid #000; padding: 8px; text-align: left; vertical-align: middle; }
+        .item-table th { background-color: #f9f9f9; font-weight: bold;}
+        
+        .totals-table { width: 300px; float: right; border-collapse: collapse; margin-bottom: 40px; font-size: 14px; }
+        .totals-table td { padding: 6px; border: 1px solid #000; }
+        .totals-table .right-align { text-align: right; }
+        .totals-table .bold { font-weight: bold; }
+
+        .signatures { clear: both; display: flex; justify-content: space-between; margin-top: 100px; text-align: center; font-size: 14px; }
+        .signatures div { border-top: 1px dotted #000; width: 30%; padding-top: 5px; }
+
+        .footer { position: absolute; bottom: 15mm; left: 0; width: 100%; text-align: center; font-size: 12px; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Enter Invoice Details</h2>
+        
+        <div class="form-group"><label>Date:</label><input type="date" id="dateInput"></div>
+        <div class="form-group"><label>Customer Name:</label><input type="text" id="customerInput"></div>
+        <div class="form-group"><label>Address:</label><input type="text" id="addressInput"></div>
+        <div class="form-group"><label>Telephone Number:</label><input type="text" id="telInput"></div>
+        <div class="form-group"><label>Sales Rep:</label><input type="text" id="repInput"></div>
+        
+        <hr style="margin: 20px 0;">
+        
+        <div class="form-group"><label>Item Code:</label><input type="text" id="itemCodeInput"></div>
+        <div class="form-group"><label>Item Name:</label><input type="text" id="itemNameInput"></div>
+        <div class="form-group"><label>Chassis Number:</label><input type="text" id="chassisInput"></div>
+        <div class="form-group"><label>Engine Number:</label><input type="text" id="engineInput"></div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div class="form-group" style="flex: 1;"><label>Quantity:</label><input type="number" id="qtyInput" value="1" step="1"></div>
+            <div class="form-group" style="flex: 2;"><label>Price (Rs):</label><input type="number" id="priceInput" value="0.00" step="0.01"></div>
+        </div>
+
+        <button onclick="addItemToInvoice()" class="btn-primary">+ Add Item</button>
+
+        <hr style="margin: 20px 0;">
+
+        <button onclick="generateAndDownloadPDF()">Generate & Download PDF</button>
+        <button onclick="resetCounter()" class="btn-danger">Reset Invoice Counter</button>
+    </div>
+
+    <div class="invoice-preview-container" id="invoiceTemplate">
+        <div class="company-name">ATV Import (Pvt) Ltd</div>
+        <div class="invoice-header">INVOICE</div>
+
+        <table class="info-table">
+            <tr>
+                <td width="15%">Invoice No</td><td width="35%">: <span id="outInvoiceNo">ATV/INV/000001</span></td>
+                <td width="15%">Address</td><td width="35%">: <span id="outAddress"></span></td>
+            </tr>
+            <tr>
+                <td>Date</td><td>: <span id="outDate"></span></td>
+                <td>Tel No</td><td>: <span id="outTel"></span></td>
+            </tr>
+            <tr>
+                <td>Customer</td><td>: <span id="outCustomer"></span></td>
+                <td>Sales Rep</td><td>: <span id="outRep"></span></td>
+            </tr>
+        </table>
+
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th width="15%">Item Code</th>
+                    <th width="35%">Item</th>
+                    <th width="10%">Qty</th>
+                    <th width="15%">Price</th>
+                    <th width="10%">Discount</th>
+                    <th width="15%">Amount</th>
+                </tr>
+            </thead>
+            <tbody id="invoiceTableBody">
+            </tbody>
+        </table>
+
+        <table class="totals-table">
+            <tr>
+                <td>Gross Amount</td>
+                <td class="right-align" id="outGross">0.00</td>
+            </tr>
+            <tr>
+                <td>Discount %</td>
+                <td class="right-align">0.00 %</td>
+            </tr>
+            <tr>
+                <td>Discount Amount</td>
+                <td class="right-align">0.00</td>
+            </tr>
+            <tr>
+                <td>Other Charges</td>
+                <td class="right-align">0.00</td>
+            </tr>
+            <tr>
+                <td class="bold">TOTAL</td>
+                <td class="right-align bold" id="outTotal">0.00</td>
+            </tr>
+        </table>
+
+        <div class="signatures">
+            <div>Checked By</div>
+            <div>Authorized By</div>
+            <div>Customer Signature</div>
+        </div>
+
+        <div class="footer">Software by: serp.lk / serphrm.com | Page 1 of 1</div>
+    </div>
+
+    <script>
+        // Store invoice number
+        let invoiceCounter = localStorage.getItem('atvInvoiceCounter');
+        if (!invoiceCounter) {
+            invoiceCounter = 1;
+        } else {
+            invoiceCounter = parseInt(invoiceCounter);
+        }
+
+        function formatInvoiceNo(num) {
+            return "ATV/INV/" + String(num).padStart(6, '0');
+        }
+
+        document.getElementById('dateInput').valueAsDate = new Date();
+
+        // NEW: Array to hold all the items added to the invoice
+        let invoiceItems = [];
+
+        function addItemToInvoice() {
+            const itemCode = document.getElementById('itemCodeInput').value;
+            const itemName = document.getElementById('itemNameInput').value;
+            const chassis = document.getElementById('chassisInput').value;
+            const engine = document.getElementById('engineInput').value;
+            const qty = parseFloat(document.getElementById('qtyInput').value || 1);
+            const price = parseFloat(document.getElementById('priceInput').value || 0);
+
+            // Make sure they at least entered a name or code before adding
+            if (itemName === "" && itemCode === "") {
+                alert("Please enter an Item Name or Item Code.");
+                return;
+            }
+
+            // Save the item to our list
+            invoiceItems.push({
+                code: itemCode,
+                name: itemName,
+                chassis: chassis,
+                engine: engine,
+                qty: qty,
+                price: price
+            });
+
+            // Clear the item input fields for the next item
+            document.getElementById('itemCodeInput').value = "";
+            document.getElementById('itemNameInput').value = "";
+            document.getElementById('chassisInput').value = "";
+            document.getElementById('engineInput').value = "";
+            document.getElementById('qtyInput').value = "1";
+            document.getElementById('priceInput').value = "0.00";
+
+            // Update the visual invoice table
+            renderTable();
+        }
+
+        function renderTable() {
+            const tableBody = document.getElementById('invoiceTableBody');
+            tableBody.innerHTML = ""; // Clear existing rows
+            
+            let totalAmount = 0;
+
+            // Loop through all saved items and draw a row for each
+            invoiceItems.forEach(item => {
+                let combinedItemString = item.name;
+                if (item.chassis || item.engine) {
+                    combinedItemString += `<br><span style="font-size: 0.85em; color: #444;">(Chassis: ${item.chassis} | Engine: ${item.engine})</span>`;
+                }
+
+                const amount = item.qty * item.price;
+                totalAmount += amount;
+
+                const row = `
+                    <tr>
+                        <td>${item.code}</td>
+                        <td>${combinedItemString}</td>
+                        <td>${item.qty.toFixed(2)}</td>
+                        <td>${item.price.toFixed(2)}</td>
+                        <td>0.00</td>
+                        <td>${amount.toFixed(2)}</td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+
+            // Update Totals
+            document.getElementById('outGross').innerText = totalAmount.toFixed(2);
+            document.getElementById('outTotal').innerText = totalAmount.toFixed(2);
+        }
+
+        function generateAndDownloadPDF() {
+            // Check if there are any items
+            if (invoiceItems.length === 0) {
+                alert("Please add at least one item to the invoice before generating the PDF.");
+                return;
+            }
+
+            // Apply Customer Details to the template right before printing
+            document.getElementById('outInvoiceNo').innerText = formatInvoiceNo(invoiceCounter);
+            document.getElementById('outDate').innerText = document.getElementById('dateInput').value;
+            document.getElementById('outCustomer').innerText = document.getElementById('customerInput').value;
+            document.getElementById('outAddress').innerText = document.getElementById('addressInput').value;
+            document.getElementById('outTel').innerText = document.getElementById('telInput').value;
+            document.getElementById('outRep').innerText = document.getElementById('repInput').value;
+
+            const element = document.getElementById('invoiceTemplate');
+            
+            const opt = {
+                margin:       0,
+                filename:     `Invoice_${formatInvoiceNo(invoiceCounter).replace(/\//g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                invoiceCounter++;
+                localStorage.setItem('atvInvoiceCounter', invoiceCounter);
+                
+                // Optional: Clear items list after successful PDF generation to start a fresh invoice
+                if(confirm("PDF Downloaded! Do you want to clear the form for a new invoice?")) {
+                    invoiceItems = [];
+                    renderTable();
+                    document.getElementById('customerInput').value = "";
+                    document.getElementById('addressInput').value = "";
+                    document.getElementById('telInput').value = "";
+                }
+            });
+        }
+
+        function resetCounter() {
+            if(confirm("Are you sure you want to reset the invoice number back to 000001?")) {
+                invoiceCounter = 1;
+                localStorage.setItem('atvInvoiceCounter', invoiceCounter);
+                alert("Counter reset!");
+            }
+        }
+    </script>
+</body>
+</html>
