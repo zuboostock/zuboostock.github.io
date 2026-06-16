@@ -30,6 +30,10 @@
         .form-group { margin-bottom: 12px; }
         .form-group label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
         .form-group input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px;}
+        
+        /* Highlight the manual invoice input slightly */
+        #manualInvoiceInput { background-color: #f8f9fa; border: 1px solid #007bff; }
+        
         button {
             width: 100%;
             padding: 10px;
@@ -100,6 +104,11 @@
     <div class="form-container">
         <h2>Enter Invoice Details</h2>
         
+        <div class="form-group">
+            <label>Invoice No (Leave blank to auto-generate):</label>
+            <input type="text" id="manualInvoiceInput">
+        </div>
+        
         <div class="form-group"><label>Date:</label><input type="date" id="dateInput"></div>
         <div class="form-group"><label>Customer Name:</label><input type="text" id="customerInput"></div>
         <div class="form-group"><label>Address:</label><input type="text" id="addressInput"></div>
@@ -123,7 +132,7 @@
         <hr style="margin: 20px 0;">
 
         <button onclick="generateAndDownloadPDF()">Generate & Download PDF</button>
-        <button onclick="resetCounter()" class="btn-danger">Reset Invoice Counter</button>
+        <button onclick="resetCounter()" class="btn-danger">Reset Auto-Counter to 1</button>
     </div>
 
     <div class="invoice-preview-container" id="invoiceTemplate">
@@ -193,7 +202,6 @@
     </div>
 
     <script>
-        // Store invoice number
         let invoiceCounter = localStorage.getItem('atvInvoiceCounter');
         if (!invoiceCounter) {
             invoiceCounter = 1;
@@ -205,9 +213,14 @@
             return "ATV/INV/" + String(num).padStart(6, '0');
         }
 
-        document.getElementById('dateInput').valueAsDate = new Date();
+        // NEW: Function to show what the next auto-number will be in the input placeholder
+        function updatePlaceholder() {
+            document.getElementById('manualInvoiceInput').placeholder = "e.g. " + formatInvoiceNo(invoiceCounter);
+        }
 
-        // NEW: Array to hold all the items added to the invoice
+        document.getElementById('dateInput').valueAsDate = new Date();
+        updatePlaceholder(); // Run on page load
+
         let invoiceItems = [];
 
         function addItemToInvoice() {
@@ -218,13 +231,11 @@
             const qty = parseFloat(document.getElementById('qtyInput').value || 1);
             const price = parseFloat(document.getElementById('priceInput').value || 0);
 
-            // Make sure they at least entered a name or code before adding
             if (itemName === "" && itemCode === "") {
                 alert("Please enter an Item Name or Item Code.");
                 return;
             }
 
-            // Save the item to our list
             invoiceItems.push({
                 code: itemCode,
                 name: itemName,
@@ -234,7 +245,6 @@
                 price: price
             });
 
-            // Clear the item input fields for the next item
             document.getElementById('itemCodeInput').value = "";
             document.getElementById('itemNameInput').value = "";
             document.getElementById('chassisInput').value = "";
@@ -242,17 +252,15 @@
             document.getElementById('qtyInput').value = "1";
             document.getElementById('priceInput').value = "0.00";
 
-            // Update the visual invoice table
             renderTable();
         }
 
         function renderTable() {
             const tableBody = document.getElementById('invoiceTableBody');
-            tableBody.innerHTML = ""; // Clear existing rows
+            tableBody.innerHTML = ""; 
             
             let totalAmount = 0;
 
-            // Loop through all saved items and draw a row for each
             invoiceItems.forEach(item => {
                 let combinedItemString = item.name;
                 if (item.chassis || item.engine) {
@@ -275,20 +283,21 @@
                 tableBody.innerHTML += row;
             });
 
-            // Update Totals
             document.getElementById('outGross').innerText = totalAmount.toFixed(2);
             document.getElementById('outTotal').innerText = totalAmount.toFixed(2);
         }
 
         function generateAndDownloadPDF() {
-            // Check if there are any items
             if (invoiceItems.length === 0) {
                 alert("Please add at least one item to the invoice before generating the PDF.");
                 return;
             }
 
-            // Apply Customer Details to the template right before printing
-            document.getElementById('outInvoiceNo').innerText = formatInvoiceNo(invoiceCounter);
+            // NEW: Determine if we are using manual or auto invoice number
+            const manualInput = document.getElementById('manualInvoiceInput').value.trim();
+            const finalInvoiceNo = manualInput !== "" ? manualInput : formatInvoiceNo(invoiceCounter);
+
+            document.getElementById('outInvoiceNo').innerText = finalInvoiceNo;
             document.getElementById('outDate').innerText = document.getElementById('dateInput').value;
             document.getElementById('outCustomer').innerText = document.getElementById('customerInput').value;
             document.getElementById('outAddress').innerText = document.getElementById('addressInput').value;
@@ -299,31 +308,37 @@
             
             const opt = {
                 margin:       0,
-                filename:     `Invoice_${formatInvoiceNo(invoiceCounter).replace(/\//g, '_')}.pdf`,
+                // Make sure the downloaded file name matches the actual number used
+                filename:     `Invoice_${finalInvoiceNo.replace(/\//g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
-                invoiceCounter++;
-                localStorage.setItem('atvInvoiceCounter', invoiceCounter);
+                // NEW: Only increase the automatic counter if they left the manual box empty
+                if (manualInput === "") {
+                    invoiceCounter++;
+                    localStorage.setItem('atvInvoiceCounter', invoiceCounter);
+                    updatePlaceholder();
+                }
                 
-                // Optional: Clear items list after successful PDF generation to start a fresh invoice
                 if(confirm("PDF Downloaded! Do you want to clear the form for a new invoice?")) {
                     invoiceItems = [];
                     renderTable();
                     document.getElementById('customerInput').value = "";
                     document.getElementById('addressInput').value = "";
                     document.getElementById('telInput').value = "";
+                    document.getElementById('manualInvoiceInput').value = ""; // Clear manual input
                 }
             });
         }
 
         function resetCounter() {
-            if(confirm("Are you sure you want to reset the invoice number back to 000001?")) {
+            if(confirm("Are you sure you want to reset the auto-counter back to 000001?")) {
                 invoiceCounter = 1;
                 localStorage.setItem('atvInvoiceCounter', invoiceCounter);
+                updatePlaceholder();
                 alert("Counter reset!");
             }
         }
