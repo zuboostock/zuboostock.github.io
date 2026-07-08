@@ -2052,6 +2052,7 @@
         }
 
         // --- RENDER TOTAL COMPANY STOCK ---
+        // --- RENDER TOTAL COMPANY STOCK ---
         function renderTotalStock(mainStockArray) {
             const tbody = document.getElementById('totalStockTableBody');
             const countSpan = document.getElementById('totalInventoryCount');
@@ -2125,12 +2126,13 @@
                 grandTotal += qty;
 
                 const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-blue-50 transition-colors";
-                tr.onclick = () => showTotalBreakdownModal(originalName);
+                // Removed cursor-pointer and onclick event
+                tr.className = "hover:bg-blue-50 transition-colors";
 
                 const tdModel = document.createElement('td');
+                // Removed the chevron-right icon
                 tdModel.className = "py-3 font-medium text-gray-800 flex items-center";
-                tdModel.innerHTML = `${originalName} <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-gray-400"></i>`;
+                tdModel.innerHTML = `${originalName}`;
 
                 const tdQty = document.createElement('td');
                 tdQty.className = "py-3 text-right";
@@ -2151,15 +2153,16 @@
             if (totalPartsCount > 0) {
                 grandTotal += totalPartsCount;
                 const tr = document.createElement('tr');
-                tr.className = "cursor-pointer hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
-                tr.onclick = () => showPartsModal("Total Inventory", totalPartsMap);
+                // Removed cursor-pointer and onclick event
+                tr.className = "hover:bg-orange-50 transition-colors bg-orange-50/40 border-t border-orange-100";
+                
+                // Replaced "View Details" with the actual quantity badge
                 tr.innerHTML = `
                     <td class="py-4 font-bold text-orange-800 flex items-center">
                         <i data-lucide="wrench" class="w-4 h-4 mr-2 text-orange-600"></i> Spare Parts & Accessories 
-                        <i data-lucide="chevron-right" class="w-4 h-4 ml-1 text-orange-300"></i>
                     </td>
                     <td class="py-4 text-right">
-                        <span class="text-xs text-orange-600 font-semibold underline decoration-orange-300 underline-offset-2">View Details</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ring-1 inset-ring bg-orange-100 text-orange-800 ring-orange-600/20">${totalPartsCount}</span>
                     </td>`;
                 tbody.appendChild(tr);
             }
