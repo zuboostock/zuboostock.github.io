@@ -432,6 +432,41 @@
 
             <!-- Branch Stock Selection UI -->
             
+            <div
+                class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col mb-8">
+                <div
+                    class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center">
+                        <div class="bg-teal-100 p-2 rounded-lg mr-3"><i data-lucide="store"
+                                class="w-5 h-5 text-teal-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                            Showroom Inventory
+                            <span id="showroomInventoryCount"
+                                class="ml-3 bg-teal-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-full shadow-sm">0</span>
+                        </h3>
+                    </div>
+                    <select id="branchStockSelector" onchange="renderBranchStockTable()"
+                        class="w-full sm:w-auto bg-white border border-gray-300 text-gray-900 text-sm rounded-xl focus:ring-teal-500 focus:border-teal-500 block p-2.5 transition-colors min-w-[220px]">
+                        <option value="">Select a branch to view...</option>
+                    </select>
+                </div>
+                <div class="overflow-x-auto flex-grow p-6">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead>
+                            <tr class="text-gray-500 border-b border-gray-200">
+                                <th scope="col" class="pb-3 font-semibold">Bike Model</th>
+                                <th scope="col" class="pb-3 font-semibold text-right">Units Currently in Branch</th>
+                            </tr>
+                        </thead>
+                        <tbody id="branchStockTableBody" class="divide-y divide-gray-100">
+                            <tr>
+                                <td colspan="2" class="py-8 text-center text-gray-400">Select a branch to view its
+                                    stock...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
             <!-- Generate Data Report Tool -->
             <div
@@ -3366,51 +3401,64 @@
         }
 
         function populateBranchSelector() {
-            const selector = document.getElementById('branchStockSelector');
-            const dlSalesBranch = document.getElementById('dlSalesBranch');
-            const dlStockBranch = document.getElementById('dlStockBranch');
+    const selector = document.getElementById('branchStockSelector');
+    const dlSalesBranch = document.getElementById('dlSalesBranch');
+    const dlStockBranch = document.getElementById('dlStockBranch');
 
-            const currentSelection = selector ? selector.value : '';
+    const currentSelection = selector ? selector.value : '';
 
-            // Main selector default
-            if (selector) selector.innerHTML = '<option value="">Select a branch to view...</option>';
+    if (selector) selector.innerHTML = '<option value="">Select a branch to view...</option>';
+    if (dlSalesBranch) dlSalesBranch.innerHTML = '<option value="all">All Branches</option>';
+    if (dlStockBranch) dlStockBranch.innerHTML = '<option value="all">All Locations</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
 
-            // Bulk Download defaults
-            if (dlSalesBranch) dlSalesBranch.innerHTML = '<option value="all">All Branches</option>';
-            if (dlStockBranch) dlStockBranch.innerHTML = '<option value="all">All Locations</option><option value="Main_Stock">Main Stock (Warehouse)</option>';
+    // --- ENTER YOUR ACCEPTED/VISIBLE BRANCHES HERE ---
+    const allowedBranches = [
+        "BUTHTHALA Branch",
+                "GANEMULLA Branch",
+                "NEGOMBO Branch",
+                "MONARAGALA Branch",
+                "PUTHTHALAMA Branch",
+                "THALPITIYA Branch",
+                "US ANURADAPURA Branch",
+                "US PADUKKA Branch",
+                "US WATHTHALA Branch",
+    ];
 
-            const branches = Object.keys(globalShowroomStocks);
-            branches.forEach(branch => {
-                const displayName = branch.replace(/_/g, ' ');
+    // Filter branches so only the ones in your allowed list (that also exist in data) are shown
+    const allBranches = Object.keys(globalShowroomStocks);
+    const branchesToUse = allowedBranches.filter(branch => allBranches.includes(branch));
 
-                if (selector) {
-                    const option = document.createElement('option');
-                    option.value = branch;
-                    option.textContent = displayName;
-                    selector.appendChild(option);
-                }
+    branchesToUse.forEach(branch => {
+        const displayName = branch.replace(/_/g, ' ');
 
-                if (dlSalesBranch) {
-                    const sOpt = document.createElement('option');
-                    sOpt.value = branch;
-                    sOpt.textContent = displayName;
-                    dlSalesBranch.appendChild(sOpt);
-                }
-
-                if (dlStockBranch) {
-                    const stOpt = document.createElement('option');
-                    stOpt.value = branch;
-                    stOpt.textContent = displayName;
-                    dlStockBranch.appendChild(stOpt);
-                }
-            });
-
-            if (selector && branches.includes(currentSelection)) {
-                selector.value = currentSelection;
-            } else if (selector && branches.length > 0) {
-                selector.value = branches[0];
-            }
+        if (selector) {
+            const option = document.createElement('option');
+            option.value = branch;
+            option.textContent = displayName;
+            selector.appendChild(option);
         }
+
+        if (dlSalesBranch) {
+            const sOpt = document.createElement('option');
+            sOpt.value = branch;
+            sOpt.textContent = displayName;
+            dlSalesBranch.appendChild(sOpt);
+        }
+
+        if (dlStockBranch) {
+            const stOpt = document.createElement('option');
+            stOpt.value = branch;
+            stOpt.textContent = displayName;
+            dlStockBranch.appendChild(stOpt);
+        }
+    });
+
+    if (selector && branchesToUse.includes(currentSelection)) {
+        selector.value = currentSelection;
+    } else if (selector && branchesToUse.length > 0) {
+        selector.value = branchesToUse[0];
+    }
+}
 
         function renderBranchStockTable() {
             const selector = document.getElementById('branchStockSelector');
