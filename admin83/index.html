@@ -443,7 +443,38 @@
             </div>
 
             <!-- Generate Data Report Tool -->
-            
+            <div
+                class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden flex flex-col mb-8">
+                <div
+                    class="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3"><i data-lucide="file-search"
+                                class="w-5 h-5 text-blue-600"></i></div>
+                        <h3 class="text-lg font-bold text-gray-800">Generate Data Report (PDF)</h3>
+                    </div>
+                    <!-- BULK EXPORT BUTTON -->
+                    <button style="display: none;" onclick="openBulkReportModal()"
+                        class="bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-colors flex items-center shadow-sm w-full sm:w-auto justify-center">
+                        <i data-lucide="download" class="w-4 h-4 mr-2"></i> Bulk Export CSV
+                    </button>
+                </div>
+                <div class="p-6 flex flex-col sm:flex-row items-end gap-4">
+                    <div class="flex-1 w-full">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Search Vehicle Details<br><small
+                                class="text-xs text-gray-500"><i>Enter Chassis No, Invoice No, NIC, or Mobile
+                                    No...</i></small></label>
+                        <div
+                            class="flex items-stretch bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm input-group transition-colors">
+                            <input type="text" id="reportSearchQuery" placeholder="Enter"
+                                class="w-full text-gray-900 text-sm border-none focus:ring-0 block p-3.5">
+                            <button type="button" onclick="generateReport()" id="btnGenerateReport"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 font-semibold transition-colors flex items-center whitespace-nowrap">
+                                <i data-lucide="file-text" class="w-4 h-4 mr-2"></i> Get Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
